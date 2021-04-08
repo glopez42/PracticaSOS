@@ -1,14 +1,6 @@
 package api;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -26,38 +18,36 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.apache.naming.NamingContext;
 
-
 @Path("/")
 public class Recursos {
-	
+
 	@Context
 	private UriInfo uriInfo;
 	private GestorBBDD gestor;
-	
+
 	public Recursos() {
 		gestor = new GestorBBDD();
 	}
-	
+
+	//Creación de un usuario
 	@POST
 	@Path("usuarios")
 	@Consumes(MediaType.APPLICATION_XML)
 	public Response createUser(Usuario user) {
 		try {
-			
-			int affectedRows = gestor.insertUser(user);
-			if (affectedRows > 0) {
-				String location = uriInfo.getAbsolutePath() + "/" + user.getNickname();
-				System.out.println(location);
-				return Response.status(Status.CREATED).header("Location", location).build();
-			}
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo crear el usuario").build();
-			
+			//llamamos al gestor para que inserte el usuario
+			gestor.insertUser(user);
+			String location = uriInfo.getAbsolutePath() + "/" + user.getNickname();
+			//si sale bien se devuelve CREATED + Location
+			return Response.status(Status.CREATED).header("Location", location).build();
+
 		} catch (SQLException e) {
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo crear el usuario\n" + e.getStackTrace()).build();
+			//si hay algun error con la BBDD es que la petición está mal hecha (usuario ya existe, por ejemplo).
+			return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
-	
-	
+
+	//Obtención de todos los usuarios de la red
 	@GET
 	@Path("usuarios")
 	@Produces(MediaType.APPLICATION_XML)
@@ -65,13 +55,13 @@ public class Recursos {
 		UsuarioList list = new UsuarioList();
 		try {
 			list.setL(gestor.getUsers());
-			
+			return Response.ok(list).build();
 		} catch (SQLException e) {
-			
-			e.printStackTrace();
+			//si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
 		}
+
 		
-		return Response.ok(list).build();
 	}
 
 }

@@ -11,7 +11,8 @@ import java.util.ArrayList;
 public class GestorBBDD {
 
 	private Connection conn;
-
+	//método para conectarse a la base de datos, se llama al principio de cada
+	//método, pero si ya se ha establezido conexión anteriormente, no hace nada
 	public boolean connect() {
 
 		String serverAddress = "localhost:3306";
@@ -23,12 +24,13 @@ public class GestorBBDD {
 		try {
 			if (this.conn == null) {
 				Class.forName("com.mysql.jdbc.Driver");
+				//el atributo conn ya no será null
 				this.conn = DriverManager.getConnection(url, us, pass);
 
 			}
 			return true;
 		} catch (SQLException e) {
-			System.out.println("Fallo al conectar: " + e.getMessage());
+			System.out.println("Fallo al conectar con la base de datos: " + e.getMessage());
 			return false;
 		} catch (ClassNotFoundException e) {
 			System.out.println("Fallo al cargar el driver: " + e.getMessage());
@@ -49,7 +51,8 @@ public class GestorBBDD {
 			return false;
 		}
 	}
-
+	
+	//método que inserta un usuario
 	public int insertUser(Usuario user) throws SQLException {
 		connect();
 		PreparedStatement ps = null;
@@ -65,7 +68,8 @@ public class GestorBBDD {
 		rs.close();
 		return affectedRows;
 	}
-
+	
+	//método que devuelve en un array list todos los usuarios de la red
 	public ArrayList<Usuario> getUsers() throws SQLException {
 		connect();
 
@@ -95,3 +99,4 @@ public class GestorBBDD {
 	}
 
 }
+

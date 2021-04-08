@@ -16,16 +16,18 @@ public class ClientePruebas {
 		WebTarget target = client.target(getBaseURI());
 		
 		Usuario user = new Usuario("asdasdsad", "Jose", "Uzurriaga", "Gartxiburu");
+		Usuario user2 = new Usuario("peppe", "Pedro", "Uzurriaga", "Gartxiburu");
 		
-		Response res = target.path("api/usuarios").request().post(Entity.xml(user),Response.class);
+		Response res1 = target.path("api/usuarios").request().post(Entity.xml(user),Response.class);
+		System.out.println(res1.getStatus());
+		Response res2 = target.path("api/usuarios").request().post(Entity.xml(user2),Response.class);
+		System.out.println(res2.getStatus());
 		
-		System.out.println(res.getStatus());
+		UsuarioList list = target.path("api/usuarios").request().accept(MediaType.APPLICATION_XML).get(UsuarioList.class);
 		
-//		UsuarioList list = target.path("api/usuarios").request().accept(MediaType.APPLICATION_XML).get(UsuarioList.class);
-//		
-//		for (int i = 0; i < list.getL().size(); i++) {
-//			System.out.println(list.getL().get(i).getNickname());
-//		}
+		for (int i = 0; i < list.getL().size(); i++) {
+			System.out.println(list.getL().get(i).getNickname());
+		}
 		
 	}
 
