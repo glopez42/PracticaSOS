@@ -88,9 +88,8 @@ public class Recursos {
 	public Response getUserData(@PathParam("nickname") String n, Usuario newUser) {
 		try {
 			if (n.compareTo(newUser.getNickname()) == 0) {
-				boolean done = gestor.updateUser(newUser);
-				if (done)
-					return Response.ok().build();
+				gestor.updateUser(newUser);
+				return Response.ok().build();
 			} else {
 				return Response.status(Response.Status.BAD_REQUEST).entity("Error, el Nickname tiene que ser el mismo")
 						.build();
@@ -104,22 +103,22 @@ public class Recursos {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
 		}
 	}
+
 	// Eliminar el usuario de la base de datos
-		@DELETE
-		@Path("usuarios/{nickname}")
-		@Produces(MediaType.APPLICATION_XML)
-		public Response deleteUser(@PathParam("nickname") String n) {
-			try {
-				boolean done = gestor.deleteUser(n);
-				if(done)
-					return Response.ok().build();
-			} catch (UserNotFoundException e) {
-				// si hay algun error significa que no se ha encontrado el Usuario
-				return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
-						.build();
-			} catch (SQLException e) {
-				// si hay algun error significa que hay algún error con el servidor de la BBDD
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
-			}
+	@DELETE
+	@Path("usuarios/{nickname}")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response deleteUser(@PathParam("nickname") String n) {
+		try {
+			gestor.deleteUser(n);
+			return Response.ok().build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		} catch (SQLException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
 		}
+	}
 }

@@ -136,7 +136,7 @@ public class GestorBBDD {
 		PreparedStatement ps = null;
 		int affectedRows = 0;
 		//No se puede modificar el usuario
-		String query = "UPDATE usuarios SET nombre = ?, apellido1 = ? , apellido2 = ? WHERE nickname = ? ;"; 
+		String query = "UPDATE usuario SET nombre = ?, apellido1 = ? , apellido2 = ? WHERE nickname = ? ;"; 
 																											
 		ps = conn.prepareStatement(query);
 		ps.setNString(1, user.getNombre());
@@ -161,7 +161,7 @@ public class GestorBBDD {
 			PreparedStatement ps = null;
 			int affectedRows = 0;
 			//No se puede modificar el usuario
-			String query = "DELETE FROM usuarios WHERE nickname = ? ;"; 
+			String query = "DELETE FROM usuario WHERE nickname = ? ;"; 
 																												
 			ps = conn.prepareStatement(query);
 			ps.setNString(1, nickname);
