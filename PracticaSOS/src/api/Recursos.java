@@ -84,7 +84,7 @@ public class Recursos {
 	// Actualizar el usuario en la base de datos
 	@PUT
 	@Path("usuarios/{nickname}")
-	@Produces(MediaType.APPLICATION_XML)
+	@Consumes(MediaType.APPLICATION_XML)
 	public Response getUserData(@PathParam("nickname") String n, Usuario newUser) {
 		try {
 			if (n.compareTo(newUser.getNickname()) == 0) {
@@ -115,6 +115,105 @@ public class Recursos {
 		} catch (UserNotFoundException e) {
 			// si hay algun error significa que no se ha encontrado el Usuario
 			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		} catch (SQLException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		}
+	}
+
+	// Añadir libro a tabla lecturas
+	@POST
+	@Path("usuarios/{nickname}/libros/{isbn}")
+	@Consumes(MediaType.APPLICATION_XML)
+	public Response addLectura(@PathParam("nickname") String n, @PathParam("isbn") String isbn, int calificacion) {
+		try {
+			if (0 >= calificacion && calificacion <= 10) {
+				gestor.addLectura(n, isbn, calificacion);
+				String location = uriInfo.getAbsolutePath() + "/" + n + "/libros/" + isbn;
+				// si sale bien se devuelve CREATED + Location
+				return Response.status(Status.CREATED).header("Location", location).build();
+			} else {
+				// Calificacion Erronea
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity("Error, el rango de la calificacion es de 0-10").build();
+			}
+		} catch (SQLException e) {
+			// si hay algun error con la BBDD es que la petición está mal hecha (usuario ya
+			// existe, por ejemplo).
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		} catch (BookNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el libro
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el libro indicado")
+					.build();
+		}
+	}
+
+	// Eliminar el usuario de la base de datos
+	@DELETE
+	@Path("usuarios/{nickname}/libros/{isbn}")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response deleteLectura(@PathParam("nickname") String n, @PathParam("isbn") String isbn) {
+		try {
+
+			gestor.deleteLectura(n, isbn);
+			return Response.ok().build();
+
+		} catch (SQLException e) {
+			// si hay algun error con la BBDD es que la petición está mal hecha (usuario ya
+			// existe, por ejemplo).
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		} catch (BookNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el libro
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el libro indicado")
+					.build();
+		}
+	}
+
+	// Obtención los ultimos libros leidos
+	@GET
+	@Path("usuarios/{nickname}/libros")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response getUltimasLecturas(@QueryParam("start") int start, @QueryParam("end") int end,
+			@PathParam("nickname") String n) {
+		LibrosList list = new LibrosList();
+		try {
+			list.setL(gestor.getUltimasLecturas(n, start, end));
+			return Response.ok(list).build();
+		} catch (SQLException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		}
+	}
+
+	// Actualizar el libro en la base de datos
+	@PUT
+	@Path("libros/{isbn}")
+	@Consumes(MediaType.APPLICATION_XML)
+	public Response getUserData(@PathParam("isbn") String isbn, Libro newLibro) {
+		try {
+			if (isbn.compareTo(newLibro.getIsbn()) == 0) {
+				gestor.updateLibro(newLibro);
+				return Response.ok().build();
+			} else {
+				return Response.status(Response.Status.BAD_REQUEST).entity("Error, el ISBN tiene que ser el mismo")
+						.build();
+			}
+		} catch (BookNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el libro
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el libro indicado")
 					.build();
 		} catch (SQLException e) {
 			// si hay algun error significa que hay algún error con el servidor de la BBDD
