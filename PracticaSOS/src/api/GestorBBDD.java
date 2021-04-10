@@ -11,8 +11,9 @@ import java.util.ArrayList;
 public class GestorBBDD {
 
 	private Connection conn;
-	//método para conectarse a la base de datos, se llama al principio de cada
-	//método, pero si ya se ha establezido conexión anteriormente, no hace nada
+
+	// método para conectarse a la base de datos, se llama al principio de cada
+	// método, pero si ya se ha establezido conexión anteriormente, no hace nada
 	public boolean connect() {
 
 		String serverAddress = "localhost:3306";
@@ -24,7 +25,7 @@ public class GestorBBDD {
 		try {
 			if (this.conn == null) {
 				Class.forName("com.mysql.jdbc.Driver");
-				//el atributo conn ya no será null
+				// el atributo conn ya no será null
 				this.conn = DriverManager.getConnection(url, us, pass);
 
 			}
@@ -51,8 +52,8 @@ public class GestorBBDD {
 			return false;
 		}
 	}
-	
-	//método que inserta un usuario
+
+	// método que inserta un usuario
 	public int insertUser(Usuario user) throws SQLException {
 		connect();
 		PreparedStatement ps = null;
@@ -68,8 +69,8 @@ public class GestorBBDD {
 		rs.close();
 		return affectedRows;
 	}
-	
-	//método que devuelve en un array list todos los usuarios de la red
+
+	// método que devuelve en un array list todos los usuarios de la red
 	public ArrayList<Usuario> getUsers() throws SQLException {
 		connect();
 
@@ -98,5 +99,82 @@ public class GestorBBDD {
 		return list;
 	}
 
-}
+	// método que devuelve un usuario de la red
+	public Usuario getUserData(String nickname) throws SQLException, UserNotFoundException {
+		connect();
 
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String query = "SELECT * FROM usuario WHERE nickname = (?) ;";
+
+		ps = conn.prepareStatement(query);
+		ps.setNString(1, nickname);
+		rs = ps.executeQuery();
+		Usuario u = new Usuario();
+
+		if (rs.next()) {
+
+			u.setNickname(rs.getString("nickname"));
+			u.setNombre(rs.getString("nombre"));
+			u.setApellido1(rs.getString("apellido1"));
+			u.setApellido2(rs.getString("apellido2"));
+
+		} else {
+			throw new UserNotFoundException();
+		}
+
+		ps.close();
+		rs.close();
+
+		return u;
+	}
+
+	// método que actualiza un usuario de la red
+	public boolean updateUser(Usuario user) throws SQLException, UserNotFoundException {
+		connect();
+
+		PreparedStatement ps = null;
+		int affectedRows = 0;
+		//No se puede modificar el usuario
+		String query = "UPDATE usuarios SET nombre = ?, apellido1 = ? , apellido2 = ? WHERE nickname = ? ;"; 
+																											
+		ps = conn.prepareStatement(query);
+		ps.setNString(1, user.getNombre());
+		ps.setNString(2, user.getApellido1());
+		ps.setNString(3, user.getApellido2());
+		ps.setNString(4, user.getNickname());
+		affectedRows = ps.executeUpdate();
+
+		if (affectedRows <= 0) {
+			throw new UserNotFoundException();
+		}
+
+		ps.close();
+		return (affectedRows > 0);
+	}
+	
+	
+	// método que actualiza un usuario de la red
+		public boolean deleteUser(String nickname) throws SQLException, UserNotFoundException {
+			connect();
+
+			PreparedStatement ps = null;
+			int affectedRows = 0;
+			//No se puede modificar el usuario
+			String query = "DELETE FROM usuarios WHERE nickname = ? ;"; 
+																												
+			ps = conn.prepareStatement(query);
+			ps.setNString(1, nickname);
+			affectedRows = ps.executeUpdate();
+
+			if (affectedRows <= 0) {
+				throw new UserNotFoundException();
+			}
+
+			ps.close();
+			return (affectedRows > 0);
+		}
+	
+	
+
+}
