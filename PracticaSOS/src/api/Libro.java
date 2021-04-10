@@ -54,7 +54,7 @@ public class Libro {
 	}
 
 
-	public String getGeneroSecunadrio() {
+	public String getGeneroSecundario() {
 		return generoSecundario;
 	}
 

@@ -4,7 +4,7 @@ CREATE SCHEMA MiRedDeLibros;
 USE MiRedDeLibros;
 
 CREATE TABLE usuario (
-	nickname VARCHAR(25) UNIQUE NOT NULL, #nickname como máximo de 25 caracteres
+	nickname VARCHAR(25) NOT NULL, #nickname como máximo de 25 caracteres
 	nombre VARCHAR(25),
 	apellido1 VARCHAR(25),
 	apellido2 VARCHAR(25),
@@ -13,7 +13,7 @@ CREATE TABLE usuario (
 
 
 CREATE TABLE libros (
-	isbn VARCHAR(13) UNIQUE NOT NULL, #isbn de 13
+	isbn VARCHAR(13) NOT NULL, #isbn de 13
 	titulo VARCHAR(100),
 	autor VARCHAR(100),
 	generoPrincipal VARCHAR(25),
@@ -35,9 +35,9 @@ CREATE TABLE amigos (
 
 
 CREATE TABLE lecturas (
-	nickname VARCHAR(25) UNIQUE NOT NULL,
-	isbn VARCHAR(13) UNIQUE NOT NULL,
-	fecha DATE,
+	nickname VARCHAR(25) NOT NULL,
+	isbn VARCHAR(13) NOT NULL,
+	fecha DATETIME,
 	calificacion INT,
 	PRIMARY KEY(nickname,isbn),
 	FOREIGN KEY(nickname) REFERENCES usuario(nickname)
@@ -76,5 +76,11 @@ VALUES ('9788496252905','Dinosaurios','David Burnie','divulgación','prehistoria
 INSERT INTO libros(isbn,titulo,autor,generoPrincipal,generoSecundario,editorial) 
 VALUES ('9788416880065','Un noruego en el camino de santiago','John Arne','humor',Null,'Astiberri');
 
+INSERT INTO lecturas(nickname,isbn,fecha,calificacion) VALUES('peppe','9788416880065',NOW(),2);
+INSERT INTO lecturas(nickname,isbn,fecha,calificacion) VALUES('peppe','9788420464831',NOW(),3);
+INSERT INTO usuario(nickname,nombre,apellido1,apellido2) VALUES('peppe','Jose','Uzualgo','Utsinoseque');
+
+INSERT INTO lecturas(nickname,isbn,fecha,calificacion) VALUES('peppe','9789700732954',NOW(),10);
 
 SELECT * FROM usuario;
+SELECT * FROM lecturas;
