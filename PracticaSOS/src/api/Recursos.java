@@ -182,8 +182,8 @@ public class Recursos {
 	@GET
 	@Path("usuarios/{nickname}/libros")
 	@Produces(MediaType.APPLICATION_XML)
-	public Response getUltimasLecturas(@QueryParam("start") int start, @QueryParam("end") int end,
-			@PathParam("nickname") String n) {
+	public Response getUltimasLecturas(@QueryParam("start") @DefaultValue("0") int start,
+			@QueryParam("end") @DefaultValue("10") int end, @PathParam("nickname") String n) {
 		LibrosList list = new LibrosList();
 		try {
 			list.setL(gestor.getUltimasLecturas(n, start, end));
@@ -220,4 +220,146 @@ public class Recursos {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
 		}
 	}
+
+	// Añadir un amigo
+	@POST
+	@Path("usuarios/{nickname}/amigos")
+	@Consumes(MediaType.APPLICATION_XML)
+	public Response addAmigo(@PathParam("nickname") String n, String nicknameAmigo) {
+		try {
+			gestor.addAmigo(n, nicknameAmigo);
+			String location = uriInfo.getAbsolutePath() + "/" + n + "/amigos/" + nicknameAmigo;
+			return Response.status(Status.CREATED).header("Location", location).build();
+		} catch (SQLException e) {
+			// si hay algun error con la BBDD es que la petición está mal hecha (usuario ya
+			// existe, por ejemplo).
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		}
+	}
+
+	// Eliminar un amigo de la lista del usuario
+	@DELETE
+	@Path("usuarios/{nickname}/amigos/{nicknameAmigo}")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response deleteAmigo(@PathParam("nickname") String n, @PathParam("nicknameAmigo") String nA) {
+		try {
+			gestor.deleteAmigo(n, nA);
+			return Response.ok().build();
+		} catch (SQLException e) {
+			// si hay algun error con la BBDD es que la petición está mal hecha (usuario ya
+			// existe, por ejemplo).
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		}
+	}
+
+	// Obtención de una lista de amigos
+	@GET
+	@Path("usuarios/{nickname}/amigos")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response getListaAmigos(@QueryParam("start") @DefaultValue("0") int start,
+			@QueryParam("end") @DefaultValue("10") int end, @QueryParam("end") @DefaultValue("") String patron,
+			@PathParam("nickname") String n) {
+		UsuarioList list = new UsuarioList();
+		try {
+			if (patron.compareTo("") == 0)
+				list.setL(gestor.getListaAmigos(n, patron));
+			else
+				list.setL(gestor.getListaAmigos(n, start, end));
+
+			return Response.ok(list).build();
+		} catch (SQLException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		}
+	}
+
+	// Obtención de una lista de lecturas de los amigos del usuario
+	@GET
+	@Path("usuarios/{nickname}/amigos/libros")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response getLecturasAmigos(@PathParam("nickname") String n,
+			@QueryParam("start") @DefaultValue("0") int start, @QueryParam("end") @DefaultValue("10") int end,
+			@QueryParam("fecha") @DefaultValue("9999-01-01 00:00:00") String fecha) {
+		LibrosList list = new LibrosList();
+		try {
+			list.setL(gestor.getLecturasAmigos(n, start, end,fecha);
+			return Response.ok(list).build();
+		} catch (SQLException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		} catch (BookNotFoundException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		} 
+	}
+
+	// Obtención de las recomendaciones de amigos
+	@GET
+	@Path("usuarios/{nickname}/amigos/recomendaciones")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response getRecomendacionesAmigos(@PathParam("nickname") String n,
+			@QueryParam("calificacion") @DefaultValue("-1") int c, @QueryParam("autor") @DefaultValue("") String autor,
+			@QueryParam("genero") @DefaultValue("") String genero) {
+		LibrosList list = new LibrosList();
+		try {
+			if (c != -1 && 0 >= c && c <= 10) {
+				list.setL(gestor.getRecomendacionesAmigos(n, autor, genero, c));
+				return Response.ok(list).build();
+			} else {
+				// Calificacion rango Erronea
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity("Error, el rango de la calificacion es de 0-10").build();
+			}
+		} catch (SQLException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		}catch (BookNotFoundException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		} 
+	}
+	/*
+	// Obtención de los datos de la app movil
+	@GET
+	@Path("usuarios/{nickname}/app")
+	@Produces(MediaType.APPLICATION_XML)
+	public Response getApp(@PathParam("nickname") String n) {
+		LibrosList list = new LibrosList();
+		try {
+			list.setL(gestor.getLecturasAmigos(n, start, end,fecha);
+			return Response.ok(list).build();
+		} catch (SQLException e) {
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
+					.build();
+		} catch (BookNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el libro
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el libro indicado")
+					.build();
+		}
+	}
+	*/
 }
