@@ -163,7 +163,7 @@ public class GestorBBDD {
 	// método que actualiza un usuario de la red
 	public boolean updateUser(Usuario user) throws SQLException, UserNotFoundException {
 		connect();
-		
+
 		// comprobamos que exista el usuario
 		this.getUserData(user.getNickname());
 
@@ -222,7 +222,6 @@ public class GestorBBDD {
 		ps.setInt(3, calificacion);
 		int affectedRows = ps.executeUpdate();
 
-		
 		ps.close();
 		return affectedRows;
 	}
@@ -246,18 +245,14 @@ public class GestorBBDD {
 		ps.setNString(2, isbn);
 		affectedRows = ps.executeUpdate();
 
-		if (affectedRows <= 0) {
-			throw new UserNotFoundException();
-		}
-
 		ps.close();
 		return (affectedRows > 0);
 	}
 
-	// método que devuelve en un array list todos los usuarios de la red
+	// método que devuelve en un array list todos los libros leidos por un usuario
 	public ArrayList<Libro> getUltimasLecturas(String nickname, int start, int end)
 			throws SQLException, UserNotFoundException, BookNotFoundException {
-		
+
 		connect();
 		// comprobamos que exista el usuario
 		this.getUserData(nickname);
@@ -267,17 +262,17 @@ public class GestorBBDD {
 		ArrayList<Libro> list = new ArrayList<Libro>();
 		String isbn = null;
 
-		String query = "SELECT * FROM lecturas WHERE nickname = ? ;";
+		String query = "SELECT * FROM lecturas WHERE nickname = ? ORDER BY fecha DESC ;";
 		ps = conn.prepareStatement(query);
 		ps.setString(1, nickname);
 		rs = ps.executeQuery();
 
 		// saltamos los libros que nos indica start
-		for (int i = 0; i < start && rs.next(); i++) {
+		for (int i = 1; i < start && rs.next(); i++) {
 		}
 
 		int contador = start;
-		while (rs.next() && contador < end) {
+		while (rs.next() && contador <= end) {
 			isbn = rs.getString("isbn");
 			list.add(this.getBookData(isbn));
 			contador++;
@@ -287,20 +282,18 @@ public class GestorBBDD {
 		rs.close();
 		return list;
 	}
-	
+
 	// método que actualiza un libro de la red
 	public boolean updateLibro(Libro libro) throws SQLException, BookNotFoundException {
 		connect();
-		
+
 		// comprobamos que existe el libro
 		this.getBookData(libro.getIsbn());
-
 		PreparedStatement ps = null;
 		int affectedRows = 0;
 		// No se puede modificar el usuario
 		String query = "UPDATE libros SET autor = ?, titulo = ? , editorial = ?, "
-				+ " , generoPrincipal = ?, generoSecundario = ? "
-				+ "WHERE isbn = ? ;";
+				+ "generoPrincipal = ?, generoSecundario = ? WHERE isbn = ? ;";
 
 		ps = conn.prepareStatement(query);
 		ps.setString(1, libro.getAutor());
@@ -314,7 +307,211 @@ public class GestorBBDD {
 		ps.close();
 		return (affectedRows > 0);
 	}
-	
-	
+
+	// método que permite a un usuario añadir un amigo
+	public boolean addAmigo(String user, String amigo) throws SQLException, UserNotFoundException {
+		connect();
+		// comprobamos que existe el usuario
+		this.getUserData(user);
+		// comprobamos que existe el amigo
+		this.getUserData(amigo);
+
+		PreparedStatement ps = null;
+		String query = "INSERT INTO amigos(nicknameUser,nicknameAmigo) VALUES ( ?, ?) ;";
+		ps = conn.prepareStatement(query);
+		ps.setString(1, user);
+		ps.setString(2, amigo);
+		int affectedRows = ps.executeUpdate();
+
+		ps.close();
+		return (affectedRows > 0);
+	}
+
+	// método que borra un amigo de un usuario dado
+	public boolean deleteAmigo(String user, String amigo) throws SQLException, UserNotFoundException {
+		connect();
+
+		// comprobamos que existe el usuario
+		this.getUserData(user);
+		// comprobamos que existe el amigo
+		this.getUserData(amigo);
+
+		PreparedStatement ps = null;
+		int affectedRows = 0;
+		String query = "DELETE FROM amigos WHERE nicknameUser = ?  AND nicknameAmigo = ? ;";
+
+		ps = conn.prepareStatement(query);
+		ps.setNString(1, user);
+		ps.setNString(2, amigo);
+		affectedRows = ps.executeUpdate();
+
+		ps.close();
+		return (affectedRows > 0);
+	}
+
+	// método que devuelve en un array list todos los amigos de un usuario
+	public ArrayList<Usuario> getListaAmigos(String nickname, int start, int end)
+			throws SQLException, UserNotFoundException {
+
+		connect();
+		// comprobamos que exista el usuario
+		this.getUserData(nickname);
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ArrayList<Usuario> list = new ArrayList<Usuario>();
+		String n = null;
+
+		String query = "SELECT * FROM amigos WHERE nickname = ? ;";
+		ps = conn.prepareStatement(query);
+		ps.setString(1, nickname);
+		rs = ps.executeQuery();
+
+		// saltamos los libros que nos indica start
+		for (int i = 1; i < start && rs.next(); i++) {
+		}
+
+		int contador = start;
+		while (rs.next() && contador <= end) {
+			n = rs.getString("nickname");
+			list.add(this.getUserData(n));
+			contador++;
+		}
+
+		ps.close();
+		rs.close();
+		return list;
+	}
+
+	// método que devuelve en un array list todos los amigos de un usuario
+	// diferenciando por un patrón
+	public ArrayList<Usuario> getListaAmigos(String nickname, String pattern)
+			throws SQLException, UserNotFoundException {
+
+		connect();
+		// comprobamos que exista el usuario
+		this.getUserData(nickname);
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ArrayList<Usuario> list = new ArrayList<Usuario>();
+		String n = null;
+
+		String query = "SELECT * FROM amigos WHERE nickname = ? LIKE = ? ;";
+		ps = conn.prepareStatement(query);
+		ps.setString(1, nickname);
+		ps.setString(2, pattern);
+		rs = ps.executeQuery();
+
+		while (rs.next()) {
+			n = rs.getString("nickname");
+			list.add(this.getUserData(n));
+		}
+
+		ps.close();
+		rs.close();
+		return list;
+	}
+
+	// método que devuelve un array con las últimas lecturas de los amigos de un
+	// usuario, pudiendo
+	// filtrar por fecha y limitando la cantidad de lecturas devueltas
+	public ArrayList<Libro> getLecturasAmigos(String nickname, int start, int end, String fecha)
+			throws SQLException, UserNotFoundException, BookNotFoundException {
+
+		connect();
+		// comprobamos que exista el usuario
+		this.getUserData(nickname);
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ArrayList<Libro> list = new ArrayList<Libro>();
+		String isbn = null;
+
+		String query = "SELECT * FROM lecturas "
+				+ "WHERE nickname IN ( SELECT nicknameAmigo FROM amigos WHERE nicknameUser = ?) " + "AND fecha < ? "
+				+ "ORDER BY fecha DESC;";
+
+		ps = conn.prepareStatement(query);
+		ps.setString(1, nickname);
+		ps.setString(2, fecha);
+		rs = ps.executeQuery();
+
+		while (rs.next()) {
+			isbn = rs.getString("isbn");
+			list.add(this.getBookData(isbn));
+		}
+
+		ps.close();
+		rs.close();
+		return list;
+	}
+
+	// método que devuelve un array con las recomendaciones de los amigos de un
+	// usuario, pudiendo
+	// filtrar por autor, género y calificacion
+	public ArrayList<Libro> getRecomendacionesAmigos(String nickname, String autor, String genero, int calificacion)
+			throws SQLException, UserNotFoundException, BookNotFoundException {
+
+		connect();
+		// comprobamos que exista el usuario
+		this.getUserData(nickname);
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ArrayList<Libro> list = new ArrayList<Libro>();
+		String isbn = null;
+		boolean cond1,cond2,cond3;
+		int contador = 1;
+		int qMark = 2;
+
+		String query = "SELECT * FROM lecturas,libros WHERE nickname = ? AND lecturas.isbn = libros.isbn ";
+		
+		if (cond1 = autor.compareTo("") != 0) {
+			query = query + "AND  libros.autor = ? ";
+			contador++;
+		}
+		
+		if (cond2 = genero.compareTo("") != 0) {
+			query = query + " AND libros.generoPrincipal = ? ";
+			contador++;
+		}
+		
+		if (cond3 = calificacion >= 0) {
+			query = query + "AND calificacion > ? ";
+			contador++;
+		}
+		
+		query = query + " ; ";
+		
+		ps = conn.prepareStatement(query);
+		ps.setString(1, nickname);
+		
+		if (cond1) {
+			ps.setString(qMark, autor);
+			qMark++;
+		}
+		
+		if (cond2) {
+			ps.setString(qMark, genero);
+			qMark++;
+		}
+		
+		if (cond3) {
+			ps.setInt(qMark, calificacion);
+			qMark++;
+		}				
+		
+		rs = ps.executeQuery();
+
+		while (rs.next()) {
+			isbn = rs.getString("isbn");
+			list.add(this.getBookData(isbn));
+		}
+
+		ps.close();
+		rs.close();
+		return list;
+	}
 
 }
