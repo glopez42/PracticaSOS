@@ -126,9 +126,10 @@ public class Recursos {
 	@POST
 	@Path("usuarios/{nickname}/libros/{isbn}")
 	@Consumes(MediaType.APPLICATION_XML)
-	public Response addLectura(@PathParam("nickname") String n, @PathParam("isbn") String isbn, int calificacion) {
+	public Response addLectura(@PathParam("nickname") String n, @PathParam("isbn") String isbn, Calificacion c) {
+		int calificacion = c.getCalificacion();
 		try {
-			if (0 >= calificacion && calificacion <= 10) {
+			if (0 <= calificacion && calificacion <= 10) {
 				gestor.addLectura(n, isbn, calificacion);
 				String location = uriInfo.getAbsolutePath() + "/" + n + "/libros/" + isbn;
 				// si sale bien se devuelve CREATED + Location
@@ -153,7 +154,7 @@ public class Recursos {
 		}
 	}
 
-	// Eliminar el usuario de la base de datos
+	// Eliminar la lectura de la base de datos
 	@DELETE
 	@Path("usuarios/{nickname}/libros/{isbn}")
 	@Produces(MediaType.APPLICATION_XML)
@@ -182,9 +183,15 @@ public class Recursos {
 	@GET
 	@Path("usuarios/{nickname}/libros")
 	@Produces(MediaType.APPLICATION_XML)
+<<<<<<< HEAD
 	public Response getUltimasLecturas(@QueryParam("start") @DefaultValue("0") int start,
 			@QueryParam("end") @DefaultValue("10") int end, @PathParam("nickname") String n) {
+=======
+	public Response getUltimasLecturas(@PathParam("nickname") String n, @QueryParam("start") int start,
+			@QueryParam("end") int end) {
+>>>>>>> ee43f3146b8ed757132eae55f577102543f8256b
 		LibrosList list = new LibrosList();
+		System.out.println(start + " " + end);
 		try {
 			list.setL(gestor.getUltimasLecturas(n, start, end));
 			return Response.ok(list).build();
@@ -195,7 +202,12 @@ public class Recursos {
 			// si hay algun error significa que no se ha encontrado el Usuario
 			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
 					.build();
+		} catch (BookNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el libro
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el libro indicado")
+					.build();
 		}
+
 	}
 
 	// Actualizar el libro en la base de datos
