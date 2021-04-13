@@ -5,24 +5,23 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-
 @XmlRootElement
-public class UsuarioList {
+public class LibrosList {
 	
-	private List<Usuario> l;
-
-	@XmlElement(name="usuario")
-	public List<Usuario> getL() {
+	private List<Libro> l;
+	
+	@XmlElement(name="libro")
+	public List<Libro> getL() {
 		return l;
 	}
 
-	public void setL(List<Usuario> l) {
+	public void setL(List<Libro> l) {
 		this.l = l;
 	}
 
-	public UsuarioList() {
+	public LibrosList() {
 		
 	}
 	
-
+	
 }
