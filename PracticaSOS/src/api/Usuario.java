@@ -1,14 +1,16 @@
 package api;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(name="usuario")
 public class Usuario {
 	
 	private String nickname;
 	private String nombre;
 	private String apellido1;
 	private String apellido2;
+	private String uri;
 	
 	public Usuario() {
 		
@@ -44,6 +46,15 @@ public class Usuario {
 
 	public void setApellido2(String apellido2) {
 		this.apellido2 = apellido2;
+	}
+
+	@XmlAttribute(name = "href",required = false)
+	public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
 	}
 	
 	

@@ -1,5 +1,9 @@
 package api;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name="libro")
 public class Libro {
 	
 	private String isbn;
@@ -8,6 +12,7 @@ public class Libro {
 	private String generoPrincipal;
 	private String generoSecundario;
 	private String editorial;
+	private String uri;
 	
 	public Libro() {
 		
@@ -59,8 +64,8 @@ public class Libro {
 	}
 
 
-	public void setGeneroSecundario(String generoSecunadrio) {
-		this.generoSecundario = generoSecunadrio;
+	public void setGeneroSecundario(String generoSecundario) {
+		this.generoSecundario = generoSecundario;
 	}
 
 
@@ -72,7 +77,15 @@ public class Libro {
 	public void setEditorial(String editorial) {
 		this.editorial = editorial;
 	}
-	
-	
 
+	@XmlAttribute(name = "href",required = false)
+	public String getUri() {
+		return uri;
+	}
+
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+	
 }

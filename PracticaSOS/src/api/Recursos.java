@@ -16,7 +16,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-import org.apache.naming.NamingContext;
 
 @Path("/")
 public class Recursos {
@@ -36,8 +35,10 @@ public class Recursos {
 	public Response createUser(Usuario user) {
 		try {
 			// llamamos al gestor para que inserte el usuario
-			gestor.insertUser(user);
 			String location = uriInfo.getAbsolutePath() + "/" + user.getNickname();
+			user.setUri(location);
+			gestor.insertUser(user);
+			
 			// si sale bien se devuelve CREATED + Location
 			return Response.status(Status.CREATED).header("Location", location).build();
 
@@ -130,8 +131,8 @@ public class Recursos {
 		int calificacion = c.getCalificacion();
 		try {
 			if (0 <= calificacion && calificacion <= 10) {
-				gestor.addLectura(n, isbn, calificacion);
-				String location = uriInfo.getAbsolutePath() + "/" + n + "/libros/" + isbn;
+				String location = uriInfo.getAbsolutePath() + "";
+				gestor.addLectura(n, isbn, calificacion,location);
 				// si sale bien se devuelve CREATED + Location
 				return Response.status(Status.CREATED).header("Location", location).build();
 			} else {
@@ -183,13 +184,8 @@ public class Recursos {
 	@GET
 	@Path("usuarios/{nickname}/libros")
 	@Produces(MediaType.APPLICATION_XML)
-<<<<<<< HEAD
 	public Response getUltimasLecturas(@QueryParam("start") @DefaultValue("0") int start,
 			@QueryParam("end") @DefaultValue("10") int end, @PathParam("nickname") String n) {
-=======
-	public Response getUltimasLecturas(@PathParam("nickname") String n, @QueryParam("start") int start,
-			@QueryParam("end") int end) {
->>>>>>> ee43f3146b8ed757132eae55f577102543f8256b
 		LibrosList list = new LibrosList();
 		System.out.println(start + " " + end);
 		try {
@@ -237,10 +233,10 @@ public class Recursos {
 	@POST
 	@Path("usuarios/{nickname}/amigos")
 	@Consumes(MediaType.APPLICATION_XML)
-	public Response addAmigo(@PathParam("nickname") String n, String nicknameAmigo) {
+	public Response addAmigo(@PathParam("nickname") String n, Usuario amigo) {
 		try {
-			gestor.addAmigo(n, nicknameAmigo);
-			String location = uriInfo.getAbsolutePath() + "/" + n + "/amigos/" + nicknameAmigo;
+			gestor.addAmigo(n, amigo.getNickname());
+			String location = uriInfo.getAbsolutePath() + "/" + amigo.getNickname();
 			return Response.status(Status.CREATED).header("Location", location).build();
 		} catch (SQLException e) {
 			// si hay algun error con la BBDD es que la petición está mal hecha (usuario ya
@@ -306,7 +302,7 @@ public class Recursos {
 			@QueryParam("fecha") @DefaultValue("9999-01-01 00:00:00") String fecha) {
 		LibrosList list = new LibrosList();
 		try {
-			list.setL(gestor.getLecturasAmigos(n, start, end,fecha);
+			list.setL(gestor.getLecturasAmigos(n, start, end,fecha));
 			return Response.ok(list).build();
 		} catch (SQLException e) {
 			// si hay algun error significa que hay algún error con el servidor de la BBDD
@@ -326,17 +322,17 @@ public class Recursos {
 	@Path("usuarios/{nickname}/amigos/recomendaciones")
 	@Produces(MediaType.APPLICATION_XML)
 	public Response getRecomendacionesAmigos(@PathParam("nickname") String n,
-			@QueryParam("calificacion") @DefaultValue("-1") int c, @QueryParam("autor") @DefaultValue("") String autor,
+			@QueryParam("calificacion") @DefaultValue("5") int c, @QueryParam("autor") @DefaultValue("") String autor,
 			@QueryParam("genero") @DefaultValue("") String genero) {
 		LibrosList list = new LibrosList();
 		try {
-			if (c != -1 && 0 >= c && c <= 10) {
+			if (c >= 0 && c <= 10) {
 				list.setL(gestor.getRecomendacionesAmigos(n, autor, genero, c));
 				return Response.ok(list).build();
 			} else {
 				// Calificacion rango Erronea
 				return Response.status(Response.Status.BAD_REQUEST)
-						.entity("Error, el rango de la calificacion es de 0-10").build();
+						.entity("Error, el rango de la calificacion es de 0-10 " + c).build();
 			}
 		} catch (SQLException e) {
 			// si hay algun error significa que hay algún error con el servidor de la BBDD

@@ -1,6 +1,8 @@
 package api;
 
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 
@@ -9,6 +11,7 @@ public class UsuarioList {
 	
 	private List<Usuario> l;
 
+	@XmlElement(name="usuario")
 	public List<Usuario> getL() {
 		return l;
 	}
@@ -20,7 +23,6 @@ public class UsuarioList {
 	public UsuarioList() {
 		
 	}
-	
 	
 
 }

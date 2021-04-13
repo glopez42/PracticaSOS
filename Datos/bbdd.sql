@@ -8,6 +8,7 @@ CREATE TABLE usuario (
 	nombre VARCHAR(25),
 	apellido1 VARCHAR(25),
 	apellido2 VARCHAR(25),
+	uri VARCHAR(125),
 	PRIMARY KEY(nickname)
 );
 
@@ -39,6 +40,7 @@ CREATE TABLE lecturas (
 	isbn VARCHAR(13) NOT NULL,
 	fecha DATETIME,
 	calificacion INT,
+	uri VARCHAR(125),
 	PRIMARY KEY(nickname,isbn),
 	FOREIGN KEY(nickname) REFERENCES usuario(nickname)
 		ON DELETE CASCADE ON UPDATE CASCADE,
@@ -82,5 +84,8 @@ INSERT INTO usuario(nickname,nombre,apellido1,apellido2) VALUES('peppe','Jose','
 
 INSERT INTO lecturas(nickname,isbn,fecha,calificacion) VALUES('peppe','9789700732954',NOW(),10);
 
+SELECT * FROM lecturas,libros WHERE nickname IN (SELECT nicknameAmigo FROM amigos WHERE nicknameUser = 'pepe2') AND lecturas.isbn = libros.isbn;
+
 SELECT * FROM usuario;
 SELECT * FROM lecturas;
+SELECT * FROM amigos;
