@@ -53,31 +53,31 @@ public class ClientePruebas {
 		// System.out.println(list.getL().get(i).getNickname());
 		// }
 
-		 Calificacion c = new Calificacion(10);
-		 Response u =
-		 target.path("api/usuarios/pepe1/libros/9788416880065").request().post(Entity.xml(c),Response.class);
-		 System.out.println(u.getStatus());
-		 Response u1 =
-		 target.path("api/usuarios/pepe1/libros/9788420683652").request().post(Entity.xml(c),Response.class);
-		 System.out.println(u1.getStatus());
-		 Response u2 =
-		 target.path("api/usuarios/pepe1/libros/9788435410992").request().post(Entity.xml(c),Response.class);
-		 System.out.println(u2.getStatus());
-		 Response u3 =
-		 target.path("api/usuarios/pepe2/libros/9788497931021").request().post(Entity.xml(c),Response.class);
-		 System.out.println(u3.getStatus());
-		 Response u4 =
-		 target.path("api/usuarios/pepe2/libros/9788497593793").request().post(Entity.xml(c),Response.class);
-		 System.out.println(u4.getStatus());
-		 Response u5 =
-		 target.path("api/usuarios/pepe3/libros/9788417552183").request().post(Entity.xml(c),Response.class);
-		 System.out.println(u5.getStatus());
-		 Response u6 =
-		 target.path("api/usuarios/pepe3/libros/9789700732954").request().post(Entity.xml(c),Response.class);
-		 System.out.println(u6.getStatus());
-		 Response u7 =
-		 target.path("api/usuarios/pepe3/libros/9788420464831").request().post(Entity.xml(c),Response.class);
-		 System.out.println(u7.getStatus());
+//		 Calificacion c = new Calificacion(10);
+//		 Response u =
+//		 target.path("api/usuarios/pepe1/libros/9788416880065").request().post(Entity.xml(c),Response.class);
+//		 System.out.println(u.getStatus());
+//		 Response u1 =
+//		 target.path("api/usuarios/pepe1/libros/9788420683652").request().post(Entity.xml(c),Response.class);
+//		 System.out.println(u1.getStatus());
+//		 Response u2 =
+//		 target.path("api/usuarios/pepe1/libros/9788435410992").request().post(Entity.xml(c),Response.class);
+//		 System.out.println(u2.getStatus());
+//		 Response u3 =
+//		 target.path("api/usuarios/pepe2/libros/9788497931021").request().post(Entity.xml(c),Response.class);
+//		 System.out.println(u3.getStatus());
+//		 Response u4 =
+//		 target.path("api/usuarios/pepe2/libros/9788497593793").request().post(Entity.xml(c),Response.class);
+//		 System.out.println(u4.getStatus());
+//		 Response u5 =
+//		 target.path("api/usuarios/pepe3/libros/9788417552183").request().post(Entity.xml(c),Response.class);
+//		 System.out.println(u5.getStatus());
+//		 Response u6 =
+//		 target.path("api/usuarios/pepe3/libros/9789700732954").request().post(Entity.xml(c),Response.class);
+//		 System.out.println(u6.getStatus());
+//		 Response u7 =
+//		 target.path("api/usuarios/pepe3/libros/9788420464831").request().post(Entity.xml(c),Response.class);
+//		 System.out.println(u7.getStatus());
 
 		// LibrosList list =
 		// target.path("api/usuarios/peppe/libros").queryParam("start",

@@ -88,4 +88,4 @@ SELECT * FROM lecturas,libros WHERE nickname IN (SELECT nicknameAmigo FROM amigo
 
 SELECT * FROM usuario;
 SELECT * FROM lecturas;
-SELECT * FROM amigos;
+SELECT * FROM amigos WHERE nicknameUser = 'hlopezv' AND nicknameAmigo LIKE 'p%';

@@ -38,7 +38,7 @@ public class Recursos {
 			String location = uriInfo.getAbsolutePath() + "/" + user.getNickname();
 			user.setUri(location);
 			gestor.insertUser(user);
-			
+
 			// si sale bien se devuelve CREATED + Location
 			return Response.status(Status.CREATED).header("Location", location).build();
 
@@ -125,14 +125,14 @@ public class Recursos {
 
 	// Añadir libro a tabla lecturas
 	@POST
-	@Path("usuarios/{nickname}/libros/{isbn}")
+	@Path("usuarios/{nickname}/libros")
 	@Consumes(MediaType.APPLICATION_XML)
-	public Response addLectura(@PathParam("nickname") String n, @PathParam("isbn") String isbn, Calificacion c) {
-		int calificacion = c.getCalificacion();
+	public Response addLectura(@PathParam("nickname") String n, Libro l) {
+		int calificacion = l.getCalificacion();
 		try {
 			if (0 <= calificacion && calificacion <= 10) {
-				String location = uriInfo.getAbsolutePath() + "";
-				gestor.addLectura(n, isbn, calificacion,location);
+				String location = uriInfo.getAbsolutePath() + "/" + l.getIsbn();
+				gestor.addLectura(n, l.getIsbn(), calificacion, location);
 				// si sale bien se devuelve CREATED + Location
 				return Response.status(Status.CREATED).header("Location", location).build();
 			} else {
@@ -187,7 +187,6 @@ public class Recursos {
 	public Response getUltimasLecturas(@QueryParam("start") @DefaultValue("0") int start,
 			@QueryParam("end") @DefaultValue("10") int end, @PathParam("nickname") String n) {
 		LibrosList list = new LibrosList();
-		System.out.println(start + " " + end);
 		try {
 			list.setL(gestor.getUltimasLecturas(n, start, end));
 			return Response.ok(list).build();
@@ -206,14 +205,14 @@ public class Recursos {
 
 	}
 
-	// Actualizar el libro en la base de datos
+	// Actualizar una lectura en la base de datos
 	@PUT
-	@Path("libros/{isbn}")
+	@Path("usuarios/{nickname}/libros/{isbn}")
 	@Consumes(MediaType.APPLICATION_XML)
-	public Response getUserData(@PathParam("isbn") String isbn, Libro newLibro) {
+	public Response getUserData(@PathParam("nickname") String nickname, @PathParam("isbn") String isbn,Libro newLibro) {
 		try {
 			if (isbn.compareTo(newLibro.getIsbn()) == 0) {
-				gestor.updateLibro(newLibro);
+				gestor.updateLibro(nickname,newLibro);
 				return Response.ok().build();
 			} else {
 				return Response.status(Response.Status.BAD_REQUEST).entity("Error, el ISBN tiene que ser el mismo")
@@ -222,6 +221,10 @@ public class Recursos {
 		} catch (BookNotFoundException e) {
 			// si hay algun error significa que no se ha encontrado el libro
 			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el libro indicado")
+					.build();
+		} catch (UserNotFoundException e) {
+			// si hay algun error significa que no se ha encontrado el Usuario
+			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
 					.build();
 		} catch (SQLException e) {
 			// si hay algun error significa que hay algún error con el servidor de la BBDD
@@ -273,11 +276,11 @@ public class Recursos {
 	@Path("usuarios/{nickname}/amigos")
 	@Produces(MediaType.APPLICATION_XML)
 	public Response getListaAmigos(@QueryParam("start") @DefaultValue("0") int start,
-			@QueryParam("end") @DefaultValue("10") int end, @QueryParam("end") @DefaultValue("") String patron,
+			@QueryParam("end") @DefaultValue("10") int end, @QueryParam("patron") @DefaultValue("") String patron,
 			@PathParam("nickname") String n) {
 		UsuarioList list = new UsuarioList();
 		try {
-			if (patron.compareTo("") == 0)
+			if (patron.compareTo("") != 0) 
 				list.setL(gestor.getListaAmigos(n, patron));
 			else
 				list.setL(gestor.getListaAmigos(n, start, end));
@@ -285,6 +288,7 @@ public class Recursos {
 			return Response.ok(list).build();
 		} catch (SQLException e) {
 			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			System.out.println(e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
 		} catch (UserNotFoundException e) {
 			// si hay algun error significa que no se ha encontrado el Usuario
@@ -302,7 +306,7 @@ public class Recursos {
 			@QueryParam("fecha") @DefaultValue("9999-01-01 00:00:00") String fecha) {
 		LibrosList list = new LibrosList();
 		try {
-			list.setL(gestor.getLecturasAmigos(n, start, end,fecha));
+			list.setL(gestor.getLecturasAmigos(n, start, end, fecha));
 			return Response.ok(list).build();
 		} catch (SQLException e) {
 			// si hay algun error significa que hay algún error con el servidor de la BBDD
@@ -313,8 +317,8 @@ public class Recursos {
 					.build();
 		} catch (BookNotFoundException e) {
 			// si hay algun error significa que hay algún error con el servidor de la BBDD
-						return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
-		} 
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
+		}
 	}
 
 	// Obtención de las recomendaciones de amigos
@@ -341,33 +345,30 @@ public class Recursos {
 			// si hay algun error significa que no se ha encontrado el Usuario
 			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
 					.build();
-		}catch (BookNotFoundException e) {
-			// si hay algun error significa que hay algún error con el servidor de la BBDD
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
-		} 
-	}
-	/*
-	// Obtención de los datos de la app movil
-	@GET
-	@Path("usuarios/{nickname}/app")
-	@Produces(MediaType.APPLICATION_XML)
-	public Response getApp(@PathParam("nickname") String n) {
-		LibrosList list = new LibrosList();
-		try {
-			list.setL(gestor.getLecturasAmigos(n, start, end,fecha);
-			return Response.ok(list).build();
-		} catch (SQLException e) {
-			// si hay algun error significa que hay algún error con el servidor de la BBDD
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
-		} catch (UserNotFoundException e) {
-			// si hay algun error significa que no se ha encontrado el Usuario
-			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el usuario indicado")
-					.build();
 		} catch (BookNotFoundException e) {
-			// si hay algun error significa que no se ha encontrado el libro
-			return Response.status(Response.Status.NOT_FOUND).entity("Error, no se ha encontrado el libro indicado")
-					.build();
+			// si hay algun error significa que hay algún error con el servidor de la BBDD
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error en el servidor").build();
 		}
 	}
-	*/
+	/*
+	 * // Obtención de los datos de la app movil
+	 * 
+	 * @GET
+	 * 
+	 * @Path("usuarios/{nickname}/app")
+	 * 
+	 * @Produces(MediaType.APPLICATION_XML) public Response
+	 * getApp(@PathParam("nickname") String n) { LibrosList list = new LibrosList();
+	 * try { list.setL(gestor.getLecturasAmigos(n, start, end,fecha); return
+	 * Response.ok(list).build(); } catch (SQLException e) { // si hay algun error
+	 * significa que hay algún error con el servidor de la BBDD return
+	 * Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+	 * entity("Error en el servidor").build(); } catch (UserNotFoundException e) {
+	 * // si hay algun error significa que no se ha encontrado el Usuario return
+	 * Response.status(Response.Status.NOT_FOUND).
+	 * entity("Error, no se ha encontrado el usuario indicado") .build(); } catch
+	 * (BookNotFoundException e) { // si hay algun error significa que no se ha
+	 * encontrado el libro return Response.status(Response.Status.NOT_FOUND).
+	 * entity("Error, no se ha encontrado el libro indicado") .build(); } }
+	 */
 }

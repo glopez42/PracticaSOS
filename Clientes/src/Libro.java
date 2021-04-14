@@ -1,5 +1,4 @@
 
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -13,6 +12,7 @@ public class Libro {
 	private String generoSecundario;
 	private String editorial;
 	private String uri;
+	private int calificacion;
 	
 	public Libro() {
 		
@@ -86,6 +86,16 @@ public class Libro {
 
 	public void setUri(String uri) {
 		this.uri = uri;
+	}
+
+	@XmlAttribute(required = false)
+	public int getCalificacion() {
+		return calificacion;
+	}
+
+
+	public void setCalificacion(int calificacion) {
+		this.calificacion = calificacion;
 	}
 	
 }

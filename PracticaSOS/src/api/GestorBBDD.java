@@ -59,7 +59,7 @@ public class GestorBBDD {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String query = "INSERT INTO usuario(nickname,nombre,apellido1,apellido2,uri) VALUES (?,?,?,?,?);";	
+		String query = "INSERT INTO usuario(nickname,nombre,apellido1,apellido2,uri) VALUES (?,?,?,?,?);";
 		ps = this.conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 		ps.setString(1, user.getNickname());
 		ps.setString(2, user.getNombre());
@@ -72,7 +72,7 @@ public class GestorBBDD {
 		ps.close();
 		rs.close();
 		return affectedRows;
-			
+
 	}
 
 	// método que devuelve en un array list todos los usuarios de la red
@@ -284,6 +284,7 @@ public class GestorBBDD {
 			isbn = rs.getString("isbn");
 			l = this.getBookData(isbn);
 			l.setUri(rs.getString("uri"));
+			l.setCalificacion(rs.getInt("calificacion"));
 			list.add(l);
 			contador++;
 		}
@@ -293,25 +294,22 @@ public class GestorBBDD {
 		return list;
 	}
 
-	// método que actualiza un libro de la red
-	public boolean updateLibro(Libro libro) throws SQLException, BookNotFoundException {
+	// método que actualiza una lectura de la red
+	public boolean updateLibro(String nickname, Libro libro) throws SQLException, BookNotFoundException, UserNotFoundException {
 		connect();
-
+		
+		// comprobamos que exista el usuario
+		this.getUserData(nickname);
 		// comprobamos que existe el libro
 		this.getBookData(libro.getIsbn());
 		PreparedStatement ps = null;
 		int affectedRows = 0;
-		// No se puede modificar el usuario
-		String query = "UPDATE libros SET autor = ?, titulo = ? , editorial = ?, "
-				+ "generoPrincipal = ?, generoSecundario = ? WHERE isbn = ? ;";
+		
+		String query = "UPDATE lecturas SET calificacion = ? WHERE isbn = ? ;";
 
 		ps = conn.prepareStatement(query);
-		ps.setString(1, libro.getAutor());
-		ps.setString(2, libro.getTitulo());
-		ps.setString(3, libro.getEditorial());
-		ps.setString(4, libro.getGeneroPrincipal());
-		ps.setString(5, libro.getGeneroSecundario());
-		ps.setString(6, libro.getIsbn());
+		ps.setInt(1, libro.getCalificacion());
+		ps.setString(2, libro.getIsbn());
 		affectedRows = ps.executeUpdate();
 
 		ps.close();
@@ -366,14 +364,14 @@ public class GestorBBDD {
 		connect();
 		// comprobamos que exista el usuario
 		this.getUserData(nickname);
-
+		
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		ArrayList<Usuario> list = new ArrayList<Usuario>();
 		String n = null;
 		Usuario user = null;
 
-		String query = "SELECT * FROM amigos WHERE nickname = ? ;";
+		String query = "SELECT * FROM amigos WHERE nicknameUser = ? ";
 		ps = conn.prepareStatement(query);
 		ps.setString(1, nickname);
 		rs = ps.executeQuery();
@@ -384,9 +382,8 @@ public class GestorBBDD {
 
 		int contador = start;
 		while (rs.next() && contador <= end) {
-			n = rs.getString("nickname");
+			n = rs.getString("nicknameAmigo");
 			user = this.getUserData(n);
-			user.setUri(rs.getString("uri"));
 			list.add(user);
 			contador++;
 		}
@@ -411,16 +408,15 @@ public class GestorBBDD {
 		String n = null;
 		Usuario user = null;
 
-		String query = "SELECT * FROM amigos WHERE nickname = ? LIKE = ? ;";
+		String query = "SELECT * FROM amigos WHERE nicknameUser = ? AND nicknameAmigo LIKE ?";
 		ps = conn.prepareStatement(query);
 		ps.setString(1, nickname);
 		ps.setString(2, pattern);
 		rs = ps.executeQuery();
 
 		while (rs.next()) {
-			n = rs.getString("nickname");
+			n = rs.getString("nicknameAmigo");
 			user = this.getUserData(n);
-			user.setUri(rs.getString("uri"));
 			list.add(user);
 		}
 
@@ -458,6 +454,7 @@ public class GestorBBDD {
 			isbn = rs.getString("isbn");
 			l = this.getBookData(isbn);
 			l.setUri(rs.getString("uri"));
+			l.setCalificacion(rs.getInt("calificacion"));
 			list.add(l);
 		}
 
@@ -467,8 +464,7 @@ public class GestorBBDD {
 	}
 
 	// método que devuelve un array con las recomendaciones de los amigos de un
-	// usuario, pudiendo
-	// filtrar por autor, género y calificacion
+	// usuario, pudiend filtrar por autor, género y calificacion
 	public ArrayList<Libro> getRecomendacionesAmigos(String nickname, String autor, String genero, int calificacion)
 			throws SQLException, UserNotFoundException, BookNotFoundException {
 
@@ -481,55 +477,52 @@ public class GestorBBDD {
 		ArrayList<Libro> list = new ArrayList<Libro>();
 		String isbn = null;
 		Libro l = null;
-		boolean cond1,cond2,cond3;
-		int contador = 1;
+		boolean cond1, cond2, cond3;
 		int qMark = 2;
 
 		String query = "SELECT * FROM lecturas,libros "
 				+ "WHERE nickname IN (SELECT nicknameAmigo FROM amigos WHERE nicknameUser = ? ) "
 				+ "AND lecturas.isbn = libros.isbn ";
-		
+
 		if (cond1 = autor.compareTo("") != 0) {
 			query = query + "AND  libros.autor = ? ";
-			contador++;
 		}
-		
+
 		if (cond2 = genero.compareTo("") != 0) {
 			query = query + " AND libros.generoPrincipal = ? ";
-			contador++;
 		}
-		
+
 		if (cond3 = calificacion >= 0) {
 			query = query + "AND calificacion > ? ";
-			contador++;
 		}
-		
+
 		query = query + " ; ";
-		
+
 		ps = conn.prepareStatement(query);
 		ps.setString(1, nickname);
-		
+
 		if (cond1) {
 			ps.setString(qMark, autor);
 			qMark++;
 		}
-		
+
 		if (cond2) {
 			ps.setString(qMark, genero);
 			qMark++;
 		}
-		
+
 		if (cond3) {
 			ps.setInt(qMark, calificacion);
 			qMark++;
-		}				
-		
+		}
+
 		rs = ps.executeQuery();
 
 		while (rs.next()) {
 			isbn = rs.getString("isbn");
 			l = this.getBookData(isbn);
 			l.setUri(rs.getString("uri"));
+			l.setCalificacion(rs.getInt("calificacion"));
 			list.add(l);
 		}
 
