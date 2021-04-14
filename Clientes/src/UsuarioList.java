@@ -8,15 +8,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class UsuarioList {
 	
-	private List<Usuario> l;
+	private List<Usuario> lista;
 
 	@XmlElement(name="usuario")
 	public List<Usuario> getL() {
-		return l;
+		return lista;
 	}
 
 	public void setL(List<Usuario> l) {
-		this.l = l;
+		this.lista = l;
 	}
 
 	public UsuarioList() {
@@ -25,3 +25,4 @@ public class UsuarioList {
 	
 
 }
+
