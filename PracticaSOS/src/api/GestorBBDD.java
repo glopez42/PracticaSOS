@@ -305,11 +305,12 @@ public class GestorBBDD {
 		PreparedStatement ps = null;
 		int affectedRows = 0;
 		
-		String query = "UPDATE lecturas SET calificacion = ? WHERE isbn = ? ;";
+		String query = "UPDATE lecturas SET calificacion = ? WHERE isbn = ? AND WHERE nickname = ? ;";
 
 		ps = conn.prepareStatement(query);
 		ps.setInt(1, libro.getCalificacion());
 		ps.setString(2, libro.getIsbn());
+		ps.setString(3, nickname);
 		affectedRows = ps.executeUpdate();
 
 		ps.close();
@@ -442,7 +443,8 @@ public class GestorBBDD {
 		Libro l = null;
 
 		String query = "SELECT * FROM lecturas "
-				+ "WHERE nickname IN ( SELECT nicknameAmigo FROM amigos WHERE nicknameUser = ?) " + "AND fecha < ? "
+				+ "WHERE nickname IN ( SELECT nicknameAmigo FROM amigos WHERE nicknameUser = ?) " 
+				+ "AND fecha < ? "
 				+ "ORDER BY fecha DESC;";
 
 		ps = conn.prepareStatement(query);
@@ -530,5 +532,34 @@ public class GestorBBDD {
 		rs.close();
 		return list;
 	}
+	
+	// método que devuelve el número de amigos que tiene un usuario
+	public int getNumAmigos (String nickname) throws SQLException, UserNotFoundException {
+		
+		// comprobamos que exista el usuario
+		this.getUserData(nickname);
+		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String query = "SELECT COUNT(*) FROM amigos WHERE nickname = (?) ;";
+
+		ps = conn.prepareStatement(query);
+		ps.setNString(1, nickname);
+		rs = ps.executeQuery();
+		int n;
+
+		if (rs.next()) {
+			n = rs.getInt(1);
+
+		} else {
+			throw new UserNotFoundException();
+		}
+
+		ps.close();
+		rs.close();
+
+		return n;
+	}
+	
 
 }

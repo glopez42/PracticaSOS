@@ -33,8 +33,8 @@ public class ClientePruebas {
 		user3.setApellido1("Uzurriaga");
 		user3.setApellido2("Gartxiburu");
 
-//		Response res = target.path("api/usuarios").request().post(Entity.xml(user), Response.class);
-//		System.out.println(res.getStatus());
+		Response res = target.path("api/usuarios").request().post(Entity.xml(user), Response.class);
+		System.out.println(res.getStatus());
 //		Response res1 = target.path("api/usuarios").request().post(Entity.xml(user2), Response.class);
 //		System.out.println(res1.getStatus());
 //		Response res2 = target.path("api/usuarios").request().post(Entity.xml(user3), Response.class);

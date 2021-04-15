@@ -11,11 +11,11 @@ public class UsuarioList {
 	private List<Usuario> lista;
 
 	@XmlElement(name="usuario")
-	public List<Usuario> getL() {
+	public List<Usuario> getLista() {
 		return lista;
 	}
 
-	public void setL(List<Usuario> l) {
+	public void setLista(List<Usuario> l) {
 		this.lista = l;
 	}
 

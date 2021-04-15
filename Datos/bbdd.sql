@@ -78,14 +78,4 @@ VALUES ('9788496252905','Dinosaurios','David Burnie','divulgación','prehistoria
 INSERT INTO libros(isbn,titulo,autor,generoPrincipal,generoSecundario,editorial) 
 VALUES ('9788416880065','Un noruego en el camino de santiago','John Arne','humor',Null,'Astiberri');
 
-INSERT INTO lecturas(nickname,isbn,fecha,calificacion) VALUES('peppe','9788416880065',NOW(),2);
-INSERT INTO lecturas(nickname,isbn,fecha,calificacion) VALUES('peppe','9788420464831',NOW(),3);
-INSERT INTO usuario(nickname,nombre,apellido1,apellido2) VALUES('peppe','Jose','Uzualgo','Utsinoseque');
-
-INSERT INTO lecturas(nickname,isbn,fecha,calificacion) VALUES('peppe','9789700732954',NOW(),10);
-
-SELECT * FROM lecturas,libros WHERE nickname IN (SELECT nicknameAmigo FROM amigos WHERE nicknameUser = 'pepe2') AND lecturas.isbn = libros.isbn;
-
 SELECT * FROM usuario;
-SELECT * FROM lecturas;
-SELECT * FROM amigos WHERE nicknameUser = 'hlopezv' AND nicknameAmigo LIKE 'p%';
