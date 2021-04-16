@@ -1,6 +1,7 @@
 import java.net.URI;
 import java.util.Scanner;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -26,7 +27,7 @@ public class ClienteJava {
 		System.out.println("\t Calificacion --> " + l.getCalificacion());
 
 	}
-	
+
 	private static void userToString(Usuario user) {
 		System.out.println("+Nickname --> " + user.getNickname());
 		System.out.println("\t -Nombre:  " + user.getNombre() + " " + user.getApellido1() + " " + user.getApellido2());
@@ -45,20 +46,22 @@ public class ClienteJava {
 		String nicknameAmigo;
 		String path;
 		String isbn;
-		String aux;
+		String aux, fecha1, fecha2;
 		int calificacion, start, end;
 		Libro libro;
 		Response res;
 		LibrosList libros;
 		UsuarioList users;
+		boolean done = false;
 
 		System.out.println("\t-Cliente Java-");
 
 		// bucle principal
-		while (true) {
+		while (!done) {
 			System.out.println("------------------------------------");
 			System.out.println("Operaciones disponibles: ");
 			System.out.println();
+			System.out.println("0) Desconectar.");
 			System.out.println("1) Añadir un usuario a la red.");
 			System.out.println("2) Obtener todos los usuarios de la red.");
 			System.out.println("3) Obtener datos de un usuario.");
@@ -81,6 +84,11 @@ public class ClienteJava {
 
 			switch (operacion) {
 			// Añadir usuario a la red---------------------
+			case 0:
+				scan.close();
+				done = true;
+				System.out.println("Conexión cerrada.");
+				break;
 			case 1:
 				Usuario user = new Usuario();
 				System.out.println();
@@ -106,7 +114,7 @@ public class ClienteJava {
 				System.out.println("Fin de la operación");
 				System.out.println();
 				break;
-				
+
 			case 2:
 				System.out.println();
 				System.out.println("Operación 2:");
@@ -118,12 +126,12 @@ public class ClienteJava {
 
 				for (int i = 0; i < list.getLista().size(); i++)
 					userToString(list.getLista().get(i));
-				
+
 				System.out.println();
 				System.out.println("Fin de la operación");
 				System.out.println();
 				break;
-				
+
 			case 3:
 				System.out.println();
 				System.out.println("Operación 3:");
@@ -131,15 +139,19 @@ public class ClienteJava {
 				System.out.println("Seleccione el nickname de usuario:");
 				aux = scan.next();
 				// Response-----------------------------
-				Usuario user1 = target.path("api/usuarios/" + aux).request().accept(MediaType.APPLICATION_XML)
-						.get(Usuario.class);
+				try {
+					Usuario user1 = target.path("api/usuarios/" + aux).request().accept(MediaType.APPLICATION_XML)
+							.get(Usuario.class);
+					userToString(user1);
+				} catch (NotFoundException e) {
+					System.out.println("Error, no encontrado.");
+				}
 
-				userToString(user1);
 				System.out.println();
 				System.out.println("Fin de la operación");
-				System.out.println();			
+				System.out.println();
 				break;
-			
+
 			case 4:
 				System.out.println();
 				System.out.println("Operación 4:");
@@ -164,9 +176,9 @@ public class ClienteJava {
 				System.out.println("El estado de la respuesta es --> " + r2.getStatus());
 				System.out.println();
 				System.out.println("Fin de la operación");
-				System.out.println();	
+				System.out.println();
 				break;
-				
+
 			case 5:
 				System.out.println();
 				System.out.println("Operación 5:");
@@ -179,12 +191,12 @@ public class ClienteJava {
 				System.out.println("El estado de la respuesta es --> " + r3.getStatus());
 				System.out.println();
 				System.out.println("Fin de la operación");
-				System.out.println();	
+				System.out.println();
 				break;
-				
+
 			case 6:
 				System.out.println();
-				System.out.println("Operación 5:");
+				System.out.println("Operación 6:");
 				System.out.println();
 				System.out.println("Seleccione el nickname de usuario:");
 				aux = scan.next();
@@ -203,12 +215,12 @@ public class ClienteJava {
 				System.out.println("El estado de la respuesta es --> " + r4.getStatus());
 				System.out.println();
 				System.out.println("Fin de la operación");
-				System.out.println();	
+				System.out.println();
 				break;
-				
+
 			case 7:
 				System.out.println();
-				System.out.println("Operación 5:");
+				System.out.println("Operación 7:");
 				System.out.println();
 				System.out.println("Seleccione el nickname de usuario:");
 				aux = scan.next();
@@ -221,9 +233,9 @@ public class ClienteJava {
 				System.out.println("El estado de la respuesta es --> " + r5.getStatus());
 				System.out.println();
 				System.out.println("Fin de la operación");
-				System.out.println();	
+				System.out.println();
 				break;
-				
+
 			case 8:
 				System.out.println();
 				System.out.println("Operación 8:");
@@ -232,11 +244,11 @@ public class ClienteJava {
 				nickname = scan.next();
 				System.out.println("Se permite limitar la cantidad de lecturas recibidas.");
 				System.out.println("Por ejemplo, si selecciona 1 como comienzo y 10 como final,\n"
-						+ "devolverá las 10 últimas lecturas. Se pueden dejar vacíos.");
+						+ "devolverá las 10 últimas lecturas.");
 				System.out.println();
-				System.out.println("Seleccione comienzo (-1 para dejar sin rellenar): ");
+				System.out.println("Seleccione comienzo (-1 para dejar sin especificar): ");
 				start = scan.nextInt();
-				System.out.println("Seleccione final (-1 para dejar sin rellenar): ");
+				System.out.println("Seleccione final (-1 para dejar sin especificar): ");
 				end = scan.nextInt();
 
 				path = "api/usuarios/" + nickname + "/libros";
@@ -291,7 +303,7 @@ public class ClienteJava {
 				System.out.println("Fin de la operación");
 				System.out.println();
 				break;
-				
+
 			case 10:
 				System.out.println();
 				System.out.println("Operación 10:");
@@ -311,7 +323,7 @@ public class ClienteJava {
 				System.out.println("Fin de la operación");
 				System.out.println();
 				break;
-				
+
 			case 11:
 				System.out.println();
 				System.out.println("Operación 11:");
@@ -346,25 +358,32 @@ public class ClienteJava {
 
 				if (r.compareTo("s") == 0) {
 					System.out.println("Para filtrar por patrón use los siguientes formatos:");
-					System.out.println(" \"símbolos\" + % + \"símbolos\"  ó");
-					System.out.println(" % + \"símbolos\" + % ");
+					System.out.println(" símbolos + % + símbolos  ó  % + símbolos + %");
+					System.out.println();
 					System.out.println("Por ejemplo, dado un amigo pepe10, se obtendría al");
-					System.out.println("escribir pep% , %10, p%, %epe%, etc ");
+					System.out.println("escribir patrones como: pep% , %10, p%, %epe%, etc ");
+					System.out.println("Siendo el símbolo '%' el resto del nickname.");
 					System.out.println("Introduzca patrón: ");
 					String patron = scan.next();
 					users = target.path(path).queryParam("patron", patron).request().get(UsuarioList.class);
 
 					for (int i = 0; i < users.getLista().size(); i++)
 						userToString(users.getLista().get(i));
+
+					System.out.println();
+					System.out.println("Fin de la operación");
+					System.out.println();
+					break;
+
 				}
 
 				System.out.println("Se permite limitar la cantidad de amigos recibidos.");
 				System.out.println("Por ejemplo, si selecciona 1 como comienzo y 10 como final,\n"
-						+ "devolverá los 10 últimos amigos. Se pueden dejar vacíos.");
+						+ "devolverá los 10 últimos amigos.");
 
-				System.out.println("Seleccione comienzo (-1 para dejar sin rellenar): ");
+				System.out.println("Seleccione comienzo (-1 para dejar sin especificar): ");
 				start = scan.nextInt();
-				System.out.println("Seleccione final (-1 para dejar sin rellenar): ");
+				System.out.println("Seleccione final (-1 para dejar sin especificar): ");
 				end = scan.nextInt();
 
 				// Obtenemos la lista
@@ -391,30 +410,44 @@ public class ClienteJava {
 				System.out.println("Operación 13:");
 				System.out.println();
 				System.out.println("Seleccione el nickname de usuario: ");
-				aux = scan.next();
-				System.out.println("La lista puede ser acotada, pudiendo elegir el rango (ej:2 hasta la 6)");
-				System.out
-						.println("Tambien se puede filtrar por fecha pudiendo ver solo los libros a partir de x fecha");
-				System.out.println(
-						"Formato de la fecha es el siguiente AAAA-MM-DD HH:MM:SS y valor por defecto 9999-01-01 00:00:00 ");
+				nickname = scan.next();
+				System.out.println("La lista puede ser acotada, pudiendo elegir el rango (ej:2 hasta la 6).");
+				System.out.println("Si se desea dejar sin especificar, introduzca -1.");
 				System.out.println("Elija desde donde quiera empezar a ver la lista:");
 				start = scan.nextInt();
+				start = (start == -1) ? 0 : start;
 				System.out.println("Elija donde quiera que termine la lista:");
 				end = scan.nextInt();
+				end = (end == -1) ? 10 : end;
+				System.out.println("Se puede filtrar por fecha pudiendo ver solo los libros a partir de x fecha");
+				System.out.println("Formato de la fecha: AAAA-MM-DD HH:MM:SS ");
+				System.out.println("Si se desea dejar sin especificar, introduzca -1.");
 				System.out.println("Escriba la fecha desde donde quiera obtener la lista");
 				aux = scan.next();
-				path = "api/usuarios/" + aux + "/amigos/libros";
-				//Response------------------------
+				
+				if ( aux.compareTo("-1") != 0) {
+					fecha1 = aux;
+					fecha2 = scan.next();
+					aux = fecha1 + " " + fecha2;
+				}else {
+					aux = "9999-01-01 00:00:00";
+				}
+				
+				path = "api/usuarios/" + nickname + "/amigos/libros";
+				// Response------------------------
 				LibrosList ll = target.path(path).queryParam("start", start).queryParam("end", end)
 						.queryParam("fecha", aux).request().accept(MediaType.APPLICATION_XML).get(LibrosList.class);
-				for (int i = 0; i < ll.getLista().size(); i++)
-					libroToString(ll.getLista().get(i));
 				
+				if (ll.getLista() != null) {
+					for (int i = 0; i < ll.getLista().size(); i++) {
+						libroToString(ll.getLista().get(i));
+					}
+				}
 				System.out.println();
 				System.out.println("Fin de la operación");
 				System.out.println();
 				break;
-				
+
 			case 14:
 				System.out.println();
 				System.out.println("Operación 14:");
@@ -423,40 +456,43 @@ public class ClienteJava {
 				aux = scan.next();
 				path = "api/usuarios/" + aux + "/amigos/recomendaciones";
 				System.out.println("Para filtrar la lista de recomendaciones se pueden filtrar según su calificación ,"
-						+ "\nautor o por su género,estos filtros se podran combinar de una en una o combinando varias");
+						+ "\nautor o por su género, estos filtros se podrán combinar de uno en uno o combinando varias");
+				System.out.println("Por defecto se muestran las lecturas con calificaciones > 5.");
 				System.out.println("--------------");
 				int calif = 5;
 				String autor = "";
 				String genero = "";
-				System.out.println("¿Desea filtrar por calificacion? (s/n)");
-				boolean c = (scan.next()).compareTo("s")== 0;
+				System.out.println("¿Desea filtrar por calificación? (s/n)");
+				boolean c = (scan.next()).compareTo("s") == 0;
 				System.out.println("¿Desea filtrar por autor? (s/n)");
-				boolean a = (scan.next()).compareTo("s")== 0;
+				boolean a = (scan.next()).compareTo("s") == 0;
 				System.out.println("¿Desea filtrar por género? (s/n)");
-				boolean g = (scan.next()).compareTo("s")== 0;
-				if(c) {
-					System.out.println("Indique que valor desea para la calificacion:");
+				boolean g = (scan.next()).compareTo("s") == 0;
+				scan.nextLine();
+				if (c) {
+					System.out.println("Indique que valor desea para la calificación:");
 					calif = scan.nextInt();
+					scan.nextLine();
 				}
-				if(a) {
-					System.out.println("Indique por cual autor desea filtrar:");
-					autor = scan.next();
+				if (a) {
+					System.out.println("Indique el nombre del autor que desea filtrar:");
+					autor = scan.nextLine();
 				}
-				if(g) {
-					System.out.println("Indique por cual género deasea filtrar");
-					genero = scan.next();
+				if (g) {
+					System.out.println("Indique el género por el que deasea filtrar");
+					genero = scan.nextLine();
 				}
-				//Response-----------------------------
+				// Response-----------------------------
 				LibrosList ll2 = target.path(path).queryParam("calificacion", calif).queryParam("autor", autor)
 						.queryParam("genero", genero).request().accept(MediaType.APPLICATION_XML).get(LibrosList.class);
 				for (int i = 0; i < ll2.getLista().size(); i++)
 					libroToString(ll2.getLista().get(i));
-				
+
 				System.out.println();
 				System.out.println("Fin de la operación");
 				System.out.println();
 				break;
-				
+
 			case 15:
 				System.out.println();
 				System.out.println("Operación 15:");
@@ -469,15 +505,31 @@ public class ClienteJava {
 				AplicacionUsuario app = target.path(path).request().get(AplicacionUsuario.class);
 
 				if (app != null) {
+					System.out.println();
 					System.out.println("A continuación se muestra la información del usuario "
 							+ app.getUser().getNickname() + ".");
+					System.out.println();
 					System.out.println("Datos del perfil: ");
 					userToString(app.getUser());
+					System.out.println();
 					System.out.println("Último libro leído: ");
-					libroToString(app.getUltimaLectura());
+					Libro lUser = app.getUltimaLectura();
+					if (lUser != null)
+						libroToString(lUser);
+					else
+						System.out.println("Este usuario no ha leído ningún libro todavía.");
+					
+					System.out.println();
 					System.out.println("Nº de amigos: " + app.getnAmigos());
+					
+					System.out.println();
 					System.out.println("Último libro leído de amigos: ");
-					libroToString(app.getUltimaLecturaAmigos());
+					Libro lAmigo = app.getUltimaLecturaAmigos();
+					
+					if (lAmigo != null)
+						libroToString(lAmigo);
+					else
+						System.out.println("Sus amigos no han leido ningún libro todavía.");
 
 				} else {
 					System.out.println("No hay información que mostrar.");

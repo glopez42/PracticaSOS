@@ -35,7 +35,7 @@ public class AplicacionUsuario {
 		this.nAmigos = nAmigos;
 	}
 	
-	@XmlElement(name = "libro")
+	@XmlElement(name = "libroAmigos")
 	public Libro getUltimaLecturaAmigos() {
 		return ultimaLecturaAmigos;
 	}

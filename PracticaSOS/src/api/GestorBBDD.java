@@ -304,8 +304,8 @@ public class GestorBBDD {
 		this.getBookData(libro.getIsbn());
 		PreparedStatement ps = null;
 		int affectedRows = 0;
-		
-		String query = "UPDATE lecturas SET calificacion = ? WHERE isbn = ? AND WHERE nickname = ? ;";
+
+		String query = "UPDATE lecturas SET calificacion = ? WHERE isbn = ? AND nickname = ? ;";
 
 		ps = conn.prepareStatement(query);
 		ps.setInt(1, libro.getCalificacion());
@@ -451,13 +451,19 @@ public class GestorBBDD {
 		ps.setString(1, nickname);
 		ps.setString(2, fecha);
 		rs = ps.executeQuery();
-
-		while (rs.next()) {
+		
+		// saltamos los libros que nos indica start
+		for (int i = 1; i < start && rs.next(); i++) {
+		}
+		
+		int contador = start;
+		while (rs.next() && contador <= end) {
 			isbn = rs.getString("isbn");
 			l = this.getBookData(isbn);
 			l.setUri(rs.getString("uri"));
 			l.setCalificacion(rs.getInt("calificacion"));
 			list.add(l);
+			contador++;
 		}
 
 		ps.close();
@@ -541,7 +547,7 @@ public class GestorBBDD {
 		
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		String query = "SELECT COUNT(*) FROM amigos WHERE nickname = (?) ;";
+		String query = "SELECT COUNT(*) FROM amigos WHERE nicknameUser = ? ;";
 
 		ps = conn.prepareStatement(query);
 		ps.setNString(1, nickname);

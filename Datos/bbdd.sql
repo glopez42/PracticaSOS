@@ -79,3 +79,9 @@ INSERT INTO libros(isbn,titulo,autor,generoPrincipal,generoSecundario,editorial)
 VALUES ('9788416880065','Un noruego en el camino de santiago','John Arne','humor',Null,'Astiberri');
 
 SELECT * FROM usuario;
+SELECT * FROM lecturas;
+SELECT * FROM amigos;
+
+UPDATE lecturas SET calificacion = 6 WHERE isbn = 9789700732954 AND nickname = 'glopezg' ;
+
+SELECT COUNT(*) FROM amigos WHERE nicknameUser = 'hlopezv' ;
