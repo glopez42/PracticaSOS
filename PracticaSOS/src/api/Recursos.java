@@ -47,6 +47,8 @@ public class Recursos {
 		} catch (SQLException e) {
 			// si hay algun error con la BBDD es que la petición está mal hecha (usuario ya
 			// existe, por ejemplo).
+			if (e.getErrorCode() == 1062)
+				return Response.status(Response.Status.BAD_REQUEST).entity("Nickname ya existente.").build();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 	}

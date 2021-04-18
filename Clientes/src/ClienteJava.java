@@ -1,6 +1,7 @@
 import java.net.URI;
 import java.util.Scanner;
 
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -25,12 +26,27 @@ public class ClienteJava {
 		System.out.println("\t Género --> " + l.getGeneroPrincipal());
 		System.out.println("\t Editorial --> " + l.getEditorial());
 		System.out.println("\t Calificacion --> " + l.getCalificacion());
+		System.out.println();
 
 	}
 
 	private static void userToString(Usuario user) {
 		System.out.println("+Nickname --> " + user.getNickname());
 		System.out.println("\t -Nombre:  " + user.getNombre() + " " + user.getApellido1() + " " + user.getApellido2());
+		System.out.println();
+	}
+	
+	private static String getUserFromUri(String uri) {
+		String nickname = "";
+		String base = "http://localhost:8080/PracticaSOS/api/usuarios/";
+		int saltar = base.length();
+		boolean done = false;
+		for (int i = saltar; i < uri.length() && !done; i++) {
+			nickname = nickname + uri.charAt(i);
+			done = (uri.charAt(i + 1) == '/');
+		}
+				
+		return nickname;
 	}
 
 	public static void main(String[] args) {
@@ -96,20 +112,25 @@ public class ClienteJava {
 				System.out.println();
 				System.out.println("Seleccione el nickname de usuario:");
 				aux = scan.next();
+				scan.nextLine();
 				user.setNickname(aux);
-				System.out.println("Introduzca su 'Nombre' por favor:");
-				aux = scan.next();
+				System.out.println("Introduzca su Nombre por favor:");
+				aux = scan.nextLine();
+				;
 				user.setNombre(aux);
-				System.out.println("Introduzca su 'Primer Apellido' por favor:");
-				aux = scan.next();
+				System.out.println("Introduzca su Primer Apellido por favor:");
+				aux = scan.nextLine();
 				user.setApellido1(aux);
-				System.out.println("Por último introduzca su 'Segundo Apellido' por favor:");
-				aux = scan.next();
+				System.out.println("Por último introduzca su Segundo Apellido por favor:");
+				aux = scan.nextLine();
 				user.setApellido2(aux);
 				// Response-----------------------------
 				Response r1 = target.path("api/usuarios").request().accept(MediaType.APPLICATION_XML)
 						.post(Entity.xml(user), Response.class);
 				System.out.println("Estado de la respuesta es --> " + r1.getStatus());
+				if (r1.getStatus() == 400) {
+					System.out.println("Ya hay un usuario con ese nickname.");
+				}
 				System.out.println();
 				System.out.println("Fin de la operación");
 				System.out.println();
@@ -121,11 +142,16 @@ public class ClienteJava {
 				System.out.println();
 				System.out.println("Esta es la lista de todos los usuarios de la red: ");
 				// Response-----------------------------
-				UsuarioList list = target.path("api/usuarios").request().accept(MediaType.APPLICATION_XML)
-						.get(UsuarioList.class);
+				try {
+					UsuarioList list = target.path("api/usuarios").request().accept(MediaType.APPLICATION_XML)
+							.get(UsuarioList.class);
 
-				for (int i = 0; i < list.getLista().size(); i++)
-					userToString(list.getLista().get(i));
+					for (int i = 0; i < list.getLista().size(); i++)
+						userToString(list.getLista().get(i));
+
+				} catch (InternalServerErrorException e) {
+					System.out.println("Error en el servidor.");
+				}
 
 				System.out.println();
 				System.out.println("Fin de la operación");
@@ -145,6 +171,8 @@ public class ClienteJava {
 					userToString(user1);
 				} catch (NotFoundException e) {
 					System.out.println("Error, no encontrado.");
+				} catch (InternalServerErrorException e) {
+					System.out.println("Error en el servidor.");
 				}
 
 				System.out.println();
@@ -160,7 +188,7 @@ public class ClienteJava {
 				nickname = scan.next();
 				Usuario newUser = new Usuario();
 				newUser.setNickname(nickname);
-				System.out.println("A continuación, introduzca los valores que se le piden para modificarlos");
+				System.out.println("A continuación, introduzca los valores actualizados");
 				System.out.println("Nuevo Nombre:");
 				aux = scan.next();
 				newUser.setNombre(aux);
@@ -254,23 +282,31 @@ public class ClienteJava {
 				path = "api/usuarios/" + nickname + "/libros";
 
 				libros = new LibrosList();
-				// Obtenemos la lista
-				if (start == -1 && end == -1)
-					libros = target.path(path).request().get(LibrosList.class);
-				else if (start == -1 && end != -1)
-					libros = target.path(path).queryParam("end", end).request().get(LibrosList.class);
-				else if (start != -1 && end == -1)
-					libros = target.path(path).queryParam("start", start).request().get(LibrosList.class);
-				else if (start != -1 && end != -1)
-					libros = target.path(path).queryParam("start", start).queryParam("end", end).request()
-							.get(LibrosList.class);
 
-				System.out.println();
-				System.out.println("Libros leídos por " + nickname + ": ");
-				System.out.println();
+				try {
+					// Obtenemos la lista
+					if (start == -1 && end == -1)
+						libros = target.path(path).request().get(LibrosList.class);
+					else if (start == -1 && end != -1)
+						libros = target.path(path).queryParam("end", end).request().get(LibrosList.class);
+					else if (start != -1 && end == -1)
+						libros = target.path(path).queryParam("start", start).request().get(LibrosList.class);
+					else if (start != -1 && end != -1)
+						libros = target.path(path).queryParam("start", start).queryParam("end", end).request()
+								.get(LibrosList.class);
 
-				for (int i = 0; i < libros.getLista().size(); i++) {
-					libroToString(libros.getLista().get(i));
+					System.out.println();
+					System.out.println("Libros leídos por " + nickname + ": ");
+					System.out.println();
+
+					for (int i = 0; i < libros.getLista().size(); i++) {
+						libroToString(libros.getLista().get(i));
+					}
+
+				} catch (NotFoundException e) {
+					System.out.println("Error, no encontrado.");
+				} catch (InternalServerErrorException e) {
+					System.out.println("Error en el servidor.");
 				}
 
 				System.out.println();
@@ -365,10 +401,20 @@ public class ClienteJava {
 					System.out.println("Siendo el símbolo '%' el resto del nickname.");
 					System.out.println("Introduzca patrón: ");
 					String patron = scan.next();
-					users = target.path(path).queryParam("patron", patron).request().get(UsuarioList.class);
+					try {
 
-					for (int i = 0; i < users.getLista().size(); i++)
-						userToString(users.getLista().get(i));
+						users = target.path(path).queryParam("patron", patron).request().get(UsuarioList.class);
+						
+						System.out.println();
+						System.out.println("Amigos de " + nickname + ":");
+						for (int i = 0; i < users.getLista().size(); i++)
+							userToString(users.getLista().get(i));
+
+					} catch (NotFoundException e) {
+						System.out.println("Error, no encontrado.");
+					} catch (InternalServerErrorException e) {
+						System.out.println("Error en el servidor.");
+					}
 
 					System.out.println();
 					System.out.println("Fin de la operación");
@@ -387,18 +433,27 @@ public class ClienteJava {
 				end = scan.nextInt();
 
 				// Obtenemos la lista
-				if (start == -1 && end == -1)
-					users = target.path(path).request().get(UsuarioList.class);
-				else if (start == -1 && end != -1)
-					users = target.path(path).queryParam("end", end).request().get(UsuarioList.class);
-				else if (start != -1 && end == -1)
-					users = target.path(path).queryParam("start", start).request().get(UsuarioList.class);
-				else if (start != -1 && end != -1)
-					users = target.path(path).queryParam("start", start).queryParam("end", end).request()
-							.get(UsuarioList.class);
+				try {
+					if (start == -1 && end == -1)
+						users = target.path(path).request().get(UsuarioList.class);
+					else if (start == -1 && end != -1)
+						users = target.path(path).queryParam("end", end).request().get(UsuarioList.class);
+					else if (start != -1 && end == -1)
+						users = target.path(path).queryParam("start", start).request().get(UsuarioList.class);
+					else if (start != -1 && end != -1)
+						users = target.path(path).queryParam("start", start).queryParam("end", end).request()
+								.get(UsuarioList.class);
+					
+					System.out.println();
+					System.out.println("Amigos de " + nickname + ":");
+					for (int i = 0; i < users.getLista().size(); i++)
+						userToString(users.getLista().get(i));
 
-				for (int i = 0; i < users.getLista().size(); i++)
-					userToString(users.getLista().get(i));
+				} catch (NotFoundException e) {
+					System.out.println("Error, no encontrado.");
+				} catch (InternalServerErrorException e) {
+					System.out.println("Error en el servidor.");
+				}
 
 				System.out.println();
 				System.out.println("Fin de la operación");
@@ -424,24 +479,32 @@ public class ClienteJava {
 				System.out.println("Si se desea dejar sin especificar, introduzca -1.");
 				System.out.println("Escriba la fecha desde donde quiera obtener la lista");
 				aux = scan.next();
-				
-				if ( aux.compareTo("-1") != 0) {
+
+				if (aux.compareTo("-1") != 0) {
 					fecha1 = aux;
 					fecha2 = scan.next();
 					aux = fecha1 + " " + fecha2;
-				}else {
+				} else {
 					aux = "9999-01-01 00:00:00";
 				}
-				
+
 				path = "api/usuarios/" + nickname + "/amigos/libros";
-				// Response------------------------
-				LibrosList ll = target.path(path).queryParam("start", start).queryParam("end", end)
-						.queryParam("fecha", aux).request().accept(MediaType.APPLICATION_XML).get(LibrosList.class);
-				
-				if (ll.getLista() != null) {
-					for (int i = 0; i < ll.getLista().size(); i++) {
-						libroToString(ll.getLista().get(i));
+				// Response-----------------------
+				try {
+					LibrosList ll = target.path(path).queryParam("start", start).queryParam("end", end)
+							.queryParam("fecha", aux).request().accept(MediaType.APPLICATION_XML).get(LibrosList.class);
+
+					if (ll.getLista() != null) {
+						for (int i = 0; i < ll.getLista().size(); i++) {
+							System.out.println("Leído por " + getUserFromUri(ll.getLista().get(i).getUri() + "."));
+							libroToString(ll.getLista().get(i));
+						}
 					}
+
+				} catch (NotFoundException e) {
+					System.out.println("Error, no encontrado.");
+				} catch (InternalServerErrorException e) {
+					System.out.println("Error en el servidor.");
 				}
 				System.out.println();
 				System.out.println("Fin de la operación");
@@ -456,7 +519,7 @@ public class ClienteJava {
 				aux = scan.next();
 				path = "api/usuarios/" + aux + "/amigos/recomendaciones";
 				System.out.println("Para filtrar la lista de recomendaciones se pueden filtrar según su calificación ,"
-						+ "\nautor o por su género, estos filtros se podrán combinar de uno en uno o combinando varias");
+						+ "\nautor o por su género, estos filtros se podrán usar de uno en uno o combinando varias");
 				System.out.println("Por defecto se muestran las lecturas con calificaciones > 5.");
 				System.out.println("--------------");
 				int calif = 5;
@@ -483,10 +546,33 @@ public class ClienteJava {
 					genero = scan.nextLine();
 				}
 				// Response-----------------------------
-				LibrosList ll2 = target.path(path).queryParam("calificacion", calif).queryParam("autor", autor)
-						.queryParam("genero", genero).request().accept(MediaType.APPLICATION_XML).get(LibrosList.class);
-				for (int i = 0; i < ll2.getLista().size(); i++)
-					libroToString(ll2.getLista().get(i));
+				try {
+					LibrosList ll2 = target.path(path).queryParam("calificacion", calif).queryParam("autor", autor)
+							.queryParam("genero", genero).request().accept(MediaType.APPLICATION_XML)
+							.get(LibrosList.class);
+					System.out.println();
+					
+					System.out.print("Mostrando recomendaciones ");
+					if (c)
+						System.out.print("con mayor calificación que " + calif);
+					if (a)
+						System.out.print(" del autor " + autor);
+					if (c)
+						System.out.print(" del género " + genero);
+					
+					System.out.println(".");
+					System.out.println();
+					
+					for (int i = 0; i < ll2.getLista().size(); i++) {
+						System.out.println("Leído por " + getUserFromUri(ll2.getLista().get(i).getUri() + "."));
+						libroToString(ll2.getLista().get(i));
+					}
+
+				} catch (NotFoundException e) {
+					System.out.println("Error, no encontrado.");
+				} catch (InternalServerErrorException e) {
+					System.out.println("Error en el servidor.");
+				}
 
 				System.out.println();
 				System.out.println("Fin de la operación");
@@ -502,37 +588,46 @@ public class ClienteJava {
 
 				path = "api/usuarios/" + nickname + "/app";
 
-				AplicacionUsuario app = target.path(path).request().get(AplicacionUsuario.class);
+				try {
+					AplicacionUsuario app = target.path(path).request().get(AplicacionUsuario.class);
 
-				if (app != null) {
-					System.out.println();
-					System.out.println("A continuación se muestra la información del usuario "
-							+ app.getUser().getNickname() + ".");
-					System.out.println();
-					System.out.println("Datos del perfil: ");
-					userToString(app.getUser());
-					System.out.println();
-					System.out.println("Último libro leído: ");
-					Libro lUser = app.getUltimaLectura();
-					if (lUser != null)
-						libroToString(lUser);
-					else
-						System.out.println("Este usuario no ha leído ningún libro todavía.");
-					
-					System.out.println();
-					System.out.println("Nº de amigos: " + app.getnAmigos());
-					
-					System.out.println();
-					System.out.println("Último libro leído de amigos: ");
-					Libro lAmigo = app.getUltimaLecturaAmigos();
-					
-					if (lAmigo != null)
-						libroToString(lAmigo);
-					else
-						System.out.println("Sus amigos no han leido ningún libro todavía.");
+					if (app != null) {
+						System.out.println();
+						System.out.println("A continuación se muestra la información del usuario "
+								+ app.getUser().getNickname() + ".");
+						System.out.println();
+						System.out.println("Datos del perfil: ");
+						userToString(app.getUser());
+						System.out.println();
+						System.out.println("Último libro leído: ");
+						Libro lUser = app.getUltimaLectura();
+						if (lUser != null)
+							libroToString(lUser);
+						else
+							System.out.println("Este usuario no ha leído ningún libro todavía.");
 
-				} else {
-					System.out.println("No hay información que mostrar.");
+						System.out.println();
+						System.out.println("Nº de amigos: " + app.getnAmigos());
+
+						System.out.println();
+						System.out.println("Último libro leído de amigos: ");
+						Libro lAmigo = app.getUltimaLecturaAmigos();
+
+						if (lAmigo != null) {
+							System.out.println("Leído por " + getUserFromUri(lAmigo.getUri() + "."));
+							libroToString(lAmigo);
+						}
+						else
+							System.out.println("Sus amigos no han leido ningún libro todavía.");
+
+					} else {
+						System.out.println("No hay información que mostrar.");
+					}
+
+				} catch (NotFoundException e) {
+					System.out.println("Error, no encontrado.");
+				} catch (InternalServerErrorException e) {
+					System.out.println("Error en el servidor.");
 				}
 
 				System.out.println();
