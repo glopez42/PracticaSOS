@@ -19,7 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-@Path("/")
+@Path("/usuarios")
 public class Recursos {
 
 	@Context
@@ -32,7 +32,7 @@ public class Recursos {
 
 	// Creación de un usuario
 	@POST
-	@Path("usuarios")
+	@Path("")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response createUser(Usuario user) {
 		try {
@@ -55,7 +55,7 @@ public class Recursos {
 
 	// Obtención de todos los usuarios de la red
 	@GET
-	@Path("usuarios")
+	@Path("")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getUsers() {
 		UsuarioList list = new UsuarioList();
@@ -70,7 +70,7 @@ public class Recursos {
 
 	// Obtención de los datos del usuario indicado(nickname)
 	@GET
-	@Path("usuarios/{nickname}")
+	@Path("/{nickname}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getUserData(@PathParam("nickname") String n) {
 		try {
@@ -88,9 +88,9 @@ public class Recursos {
 
 	// Actualizar el usuario en la base de datos
 	@PUT
-	@Path("usuarios/{nickname}")
+	@Path("/{nickname}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getUserData(@PathParam("nickname") String n, Usuario newUser) {
+	public Response updateUserData(@PathParam("nickname") String n, Usuario newUser) {
 		try {
 			if (n.compareTo(newUser.getNickname()) == 0) {
 				gestor.updateUser(newUser);
@@ -111,7 +111,7 @@ public class Recursos {
 
 	// Eliminar el usuario de la base de datos
 	@DELETE
-	@Path("usuarios/{nickname}")
+	@Path("/{nickname}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response deleteUser(@PathParam("nickname") String n) {
 		try {
@@ -129,7 +129,7 @@ public class Recursos {
 
 	// Añadir libro a tabla lecturas
 	@POST
-	@Path("usuarios/{nickname}/libros")
+	@Path("/{nickname}/libros")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response addLectura(@PathParam("nickname") String n, Libro l) {
 		int calificacion = l.getCalificacion();
@@ -161,7 +161,7 @@ public class Recursos {
 
 	// Eliminar la lectura de la base de datos
 	@DELETE
-	@Path("usuarios/{nickname}/libros/{isbn}")
+	@Path("/{nickname}/libros/{isbn}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response deleteLectura(@PathParam("nickname") String n, @PathParam("isbn") String isbn) {
 		try {
@@ -186,7 +186,7 @@ public class Recursos {
 
 	// Obtención los ultimos libros leidos
 	@GET
-	@Path("usuarios/{nickname}/libros")
+	@Path("/{nickname}/libros")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getUltimasLecturas(@QueryParam("start") @DefaultValue("0") int start,
 			@QueryParam("end") @DefaultValue("10") int end, @PathParam("nickname") String n) {
@@ -211,7 +211,7 @@ public class Recursos {
 
 	// Actualizar una lectura en la base de datos
 	@PUT
-	@Path("usuarios/{nickname}/libros/{isbn}")
+	@Path("/{nickname}/libros/{isbn}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response updateLectura(@PathParam("nickname") String nickname, @PathParam("isbn") String isbn,
 			Libro newLibro) {
@@ -239,7 +239,7 @@ public class Recursos {
 
 	// Añadir un amigo
 	@POST
-	@Path("usuarios/{nickname}/amigos")
+	@Path("/{nickname}/amigos")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response addAmigo(@PathParam("nickname") String n, Usuario amigo) {
 		try {
@@ -259,7 +259,7 @@ public class Recursos {
 
 	// Eliminar un amigo de la lista del usuario
 	@DELETE
-	@Path("usuarios/{nickname}/amigos/{nicknameAmigo}")
+	@Path("/{nickname}/amigos/{nicknameAmigo}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response deleteAmigo(@PathParam("nickname") String n, @PathParam("nicknameAmigo") String nA) {
 		try {
@@ -278,7 +278,7 @@ public class Recursos {
 
 	// Obtención de una lista de amigos
 	@GET
-	@Path("usuarios/{nickname}/amigos")
+	@Path("/{nickname}/amigos")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getListaAmigos(@QueryParam("start") @DefaultValue("0") int start,
 			@QueryParam("end") @DefaultValue("10") int end, @QueryParam("patron") @DefaultValue("") String patron,
@@ -304,7 +304,7 @@ public class Recursos {
 
 	// Obtención de una lista de lecturas de los amigos del usuario
 	@GET
-	@Path("usuarios/{nickname}/amigos/libros")
+	@Path("/{nickname}/amigos/libros")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getLecturasAmigos(@PathParam("nickname") String n,
 			@QueryParam("start") @DefaultValue("0") int start, @QueryParam("end") @DefaultValue("10") int end,
@@ -328,7 +328,7 @@ public class Recursos {
 
 	// Obtención de las recomendaciones de amigos
 	@GET
-	@Path("usuarios/{nickname}/amigos/recomendaciones")
+	@Path("/{nickname}/amigos/recomendaciones")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getRecomendacionesAmigos(@PathParam("nickname") String n,
 			@QueryParam("calificacion") @DefaultValue("5") int c, @QueryParam("autor") @DefaultValue("") String autor,
@@ -358,8 +358,8 @@ public class Recursos {
 
 	// Obtención de los datos de la app movil
 	@GET
-	@Path("usuarios/{nickname}/app")
-	@Produces(MediaType.APPLICATION_XML)
+	@Path("/{nickname}/app")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getApp(@PathParam("nickname") String n) {
 		try {
 			AplicacionUsuario aU = new AplicacionUsuario();

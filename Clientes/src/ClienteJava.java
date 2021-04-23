@@ -552,9 +552,9 @@ public class ClienteJava {
 							.get(LibrosList.class);
 					System.out.println();
 					
-					System.out.print("Mostrando recomendaciones ");
+					System.out.print("Mostrando recomendaciones");
 					if (c)
-						System.out.print("con mayor calificación que " + calif);
+						System.out.print(" con mayor calificación que " + calif);
 					if (a)
 						System.out.print(" del autor " + autor);
 					if (c)

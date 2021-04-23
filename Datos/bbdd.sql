@@ -1,4 +1,3 @@
-DROP SCHEMA MiRedDeLibros;
 CREATE SCHEMA MiRedDeLibros;
 
 USE MiRedDeLibros;
@@ -168,11 +167,6 @@ INSERT INTO lecturas(nickname,isbn,fecha,calificacion,uri)
 VALUES ('bookDestroyer','9788497593793','2021-04-08 11:00:00',7,'http://localhost:8080/PracticaSOS/api/usuarios/bookDestroyer/libros/9788497593793');
 INSERT INTO lecturas(nickname,isbn,fecha,calificacion,uri)
 VALUES ('bookDestroyer','9788417347949','2021-04-10 08:00:00',8,'http://localhost:8080/PracticaSOS/api/usuarios/bookDestroyer/libros/9788417347949');
-
-SELECT * FROM usuario;
-SELECT * FROM libros;
-SELECT * FROM lecturas;
-SELECT * FROM amigos;
 
 
 
